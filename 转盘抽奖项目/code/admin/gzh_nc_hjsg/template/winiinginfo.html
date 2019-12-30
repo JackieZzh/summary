@@ -1,0 +1,195 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/assets/css/file.css" />
+<style>
+    #erweim{
+        width: 131px;
+        height: 132px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 2px 2px #aaa;
+        z-index: 9999;
+        margin: 0 0;
+        padding: 0 0;
+        position: absolute;
+    }
+    #erweim .boxImg{
+        position: relative;
+        top :0;
+        left:10px;
+        width: 111px;
+        height: 111px;
+    }
+</style>
+
+<div class="chooseH" style="margin-bottom: 50px; width: 200px;">
+    <form class="layui-form">
+        <input type="hidden" id="hid" value="{$active_id}">
+        <select name="hospital" lay-filter="chooseHospital">
+            <option value="">选择活动</option>
+            {loop $activeList $key $value}
+            {if $value['id'] == $active_id}
+            <option value="{$value['id']}" selected="selected">{$value['title']}</option>
+            {else}
+            <option value="{$value['id']}" >{$value['title']}</option>
+            {/if}
+            {/loop}
+        </select>
+    </form>
+</div>
+<div class="content" style="display: none">
+    <div class="article_select_box">
+        <button class="layui-btn layui-btn-normal" id="btn-refresh">刷新</button>
+        <div>
+            <div class="demoTable">
+                <div class="layui-inline" style="width: 300px">
+                    <input type="text" class="layui-input" id="chooseTime" name="chooseTime" placeholder=" 请选择时间 ">
+                </div>
+            </div>
+            <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+        </div>
+
+    </div>
+    <div>
+        <table id="demo" lay-filter="demo"></table>
+    </div>
+</div>
+
+<!--二维码弹框-->
+<!--<div style="display: none" id="erweim" data-status="1">
+    <div class="boxTitle">请用微信扫一扫</div>
+    <div class="boxImg"></div>
+</div>-->
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+<script type="text/html" id="image">
+    <img src="{{d.headimgurl}}" width='40px' height='40px'>
+</script>
+
+<script type="text/html" id="status">
+    {{# if(d.choose == 1){ }}
+    1.1元近视检查套餐
+    {{# } else if(d.choose == 2) { }}
+    99元手术抵用劵
+    {{# } else if(d.choose == 3) { }}
+    199元手术抵用劵
+    {{# } else if(d.choose == 4) { }}
+    300元角膜塑形镜抵用券
+    {{# } else if(d.choose == 5) { }}
+    99元干眼spa体验券
+    {{# } }}
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        var a = $("#hid").val();
+        if (a != null && a != "" && a != 0){
+            $('.content').css('display', 'block');
+            getActiveInfo(a)
+        }
+        layui.use(['form', 'laydate'], function(){
+            var form = layui.form,
+                laydate = layui.laydate;
+            form.on('select(chooseHospital)', function(data){
+                // 根据选择的医院 显示对应医院活动列表
+                var hid = data.value;
+                if(hid != null && hid != ''){
+                    $('.content').css('display', 'block');
+                    if ($('#hid').val() == hid){
+                        return false
+                    }  else {
+                        $('#hid').val(hid);
+                        getActiveInfo(hid)
+                    }
+                } else {
+                    return false
+                }
+            });
+
+            laydate.render({
+                elem: '#chooseTime'
+                ,type: 'datetime'
+                ,range: '~'
+            });
+        })
+    });
+    function getActiveInfo(hid){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                table.render({
+                    elem: '#demo'
+                    ,height: 600
+                    ,url: "{url 'site/entry/GetWinningInfo' array('m'=>$_GPC['m'],'op'=>'GetWinningInfo','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 50
+                        ,limits:[ 50, 100, 200, 500]
+                        ,first: "首页" //不显示首页
+                        ,last: "尾页" //不显示尾页
+                    }
+                    ,where: {
+                        hid: hid
+                    }
+                    ,autoSort: false
+                    ,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'5%',  align: 'center'},
+                        {field: 'headimgurl', title: '头像', width:'10%',  align: 'center', templet:'#image'},
+                        {field: 'nickname', title: '用户昵称', width:'10%',  align: 'center'},
+                        {field: 'realname', title: '真实姓名', width:'10%', align: 'center'},
+                        {field: 'choose', title: '报名活动', width:'12%', align: 'center', templet:'#status'},
+                        {field: 'tel', title: '电话', width:'10%', align: 'center'},
+                        {field: 'tel_info', title: '手机号归属地', width:'12%', align: 'center'},
+                        {field: 'ip_info', title: 'ip地址', width:'10%', align: 'center'},
+                        {field: 'time', title: '获奖时间', width:'11%', align: 'center'},
+                        {field: 'goodsname', title: '奖品', width:'10%', align: 'center'}
+                    ]]
+                });
+            };
+            renderTable();
+            table.on('sort(demo)', function(obj){
+                table.reload('demo', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var time = $('#chooseTime').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/GetWinningInfo' array('m'=>$_GPC['m'],'op'=>'GetWinningInfo','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            time: time
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+            // 活动详情
+            table.on("tool(demo)", function(obj){
+                var uid = obj.data.id;
+                window.location.href = "{url 'site/entry/OneUserStatistics' array('m'=>$_GPC['m'],'op'=>'OneUserStatistics','version_id'=>$_GPC['version_id'])}&uid="+ uid;
+            })
+        });
+    }
+
+</script>
+{template 'common/footer'}

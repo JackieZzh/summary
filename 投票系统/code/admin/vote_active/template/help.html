@@ -1,0 +1,16 @@
+{template 'common/header'}
+<div>该浏览器暂不支持在线预览 您可以点击下方按钮下载操作手册</div>
+<div><a href="{MODULE_URL}res/comment/file/word/dzxt.pdf">下载操作手册</a></div>
+
+<div id="handout_wrap_inner"></div>
+
+<input name="" type="hidden" id="pdfUrl" value="{MODULE_URL}res/comment/file/word/dzxt.pdf"/>
+<script src="{MODULE_URL}res/comment/js/word.js"></script>
+<script type="text/javascript">
+    var pdfUrl = $("#pdfUrl").val();
+    window.onload = function (){
+        var myPDF = new PDFObject({ url: pdfUrl }).embed();
+    };
+</script>
+
+{template 'common/footer'}

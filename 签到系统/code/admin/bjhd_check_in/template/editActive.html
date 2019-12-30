@@ -1,0 +1,230 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    #synopsis{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: slategray;
+        margin-right: 20px;
+    }
+    .preview_btn{
+        position: fixed;
+        top: 20%;
+        right: 0;
+        background-color: #ddd;
+        color: #1296DB;
+        width: 70px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 5px 0 0 5px;
+        z-index: 999999;
+    }
+    .preview_btn:hover{
+        cursor: pointer;
+    }
+</style>
+
+<div class="top" >
+    {if $type == 1 }
+    <span>添加新会议</span>
+    {else}
+    <span style="font-size: 20px;margin-bottom: 50px">会议名: {$data['title']}</span>
+    {/if}
+</div>
+
+<div class="layui-tab">
+    <form class="layui-form" id="form" enctype="multipart/form-data">
+        <input type="hidden" name="type" id="type" value="{$type}">
+        {if $type == 2}
+        <input type="hidden" name="id" id="id" value="{$data['id']}">
+        <input type="hidden"  id="begin" value="{$data['begin']}">
+        <input type="hidden"  id="end" value="{$data['end']}">
+        {else}
+        <input type="hidden" name="hid" id="hid" value="{$hid}">
+        {/if}
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">会议名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" lay-verify="required" autocomplete="off"  class="layui-input" value="{$data['title']}" maxlength="">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">会议时间</label>
+            <div class="layui-input-block" style="width: 300px">
+                <input name="active_time" type="text" class="layui-input" id="active_time" >
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline ">
+                <label class="layui-form-label">会议可提前签到时间</label>
+                <div class="layui-input-block">
+                    <input type="text" name="before_time" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['before_time']}">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-inline ">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-block"  style="width: 100px">
+                {if $data['sort']}
+                    <input type="text" name="sort" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['sort']}">
+                {else}
+                    <input type="text" name="sort" lay-verify="number" autocomplete="off" class="layui-input" value="0">
+                {/if}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">显隐</label>
+            <div class="layui-input-block">
+                {if $data['is_show'] == 1}
+                <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏"  checked>
+                {else}
+                <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏" >
+                {/if}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <a class="layui-btn layui-btn-normal" id="submitBtn" lay-submit lay-filter="submitBtn"></a>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+        var type = $('#type').val();
+        if (type == 1){
+            $('#submitBtn').text('确认添加');
+            times = '';
+        } else {
+            $('#submitBtn').text('确认修改');
+            var  begin = $('#begin').val(),
+                end = $('#end').val(),
+                times = begin+' ~ '+end;
+        }
+
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#active_time',
+                min: 0,
+                type: 'datetime',
+                range: '~',
+                value: times
+            });
+        });
+
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('submit(submitBtn)', function(){
+                // 添加 or 修改
+                var formData = new FormData($("#form")[0]); //此处id为form表单的id
+                $.ajax({
+                    url:"{url 'site/entry/addOrUpdateActive' array('m'=>$_GPC['m'],'op'=>'addOrUpdateActive','version_id'=>$_GPC['version_id'])}",
+                    type: 'post',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        res = $.parseJSON(res);
+                        if(res.code == 200){
+                            layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                history.back(-1);
+                            });
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    },
+                    error: function (data) {}
+                });
+                return false;
+            });
+
+            // 监听switch
+            form.on('switch(hiddenTpl)', function(obj){
+                var contexts;
+                var hide;
+                var x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                var aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 1;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 2;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        var str = "&type=2&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+        });
+
+    });
+
+
+    $("#synopsisText").bind("input propertychange focus",function(){
+        var a = $(this).val(),
+            l = a.length,
+            c = 255 - l;
+        if (c > 0){
+            $('#synopsis').html("您还可以输入 <b>"+ c + "</b> 个字");
+        } else{
+            $('#synopsis').html("<b style='color:red;'>已达到最大字数!!!</b>");
+        }
+    });
+    $("#synopsisText").bind("blur", function(){
+        $('#synopsis').html("");
+    });
+
+</script>
+
+{template 'common/footer'}

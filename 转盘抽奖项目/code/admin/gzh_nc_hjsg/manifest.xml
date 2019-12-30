@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.we7.cc" versionCode="0.6">
+	<application setting="true">
+		<name><![CDATA[抽奖]]></name>
+		<identifie><![CDATA[gzh_nc_hjsg]]></identifie>
+		<version><![CDATA[1.0]]></version>
+		<type><![CDATA[other]]></type>
+		<ability><![CDATA[抽奖]]></ability>
+		<description><![CDATA[抽奖]]></description>
+		<author><![CDATA[puruiyanke]]></author>
+		<url><![CDATA[http://bbs.we7.cc]]></url>
+	</application>
+	<platform>
+		<subscribes>
+
+		</subscribes>
+		<handles>
+			<message type="text" />
+			<message type="image" />
+			<message type="voice" />
+			<message type="video" />
+			<message type="location" />
+			<message type="link" />
+			<message type="subscribe" />
+			<message type="qr" />
+			<message type="trace" />
+			<message type="click" />
+			<message type="enter" />
+		</handles>
+		<rule embed="true" />
+		<supports>
+			<item type="app" />
+		</supports>
+	</platform>
+	<bindings>
+		<!--<cover call="getRuleMenus">-->
+		<!--<entry title="便利店首页" do="store" state="" direct="true" />-->
+		<!--</cover>-->
+		<menu>
+			<entry title="游戏列表管理" do="gameslist" state="" direct="false" />
+			<entry title="中奖信息列表管理" do="winninginfo" state="" direct="false" />
+			<entry title="用户列表管理" do="userinfo" state="" direct="false" />
+		</menu>
+		<!--<home call="getHomes">-->
+		<!--<entry title="便利店首页" do="store" state="" direct="true" />-->
+		<!--</home>-->
+		<!--<profile call="getProfiles">-->
+		<!--<entry title="便利店订单" do="orders" state="" direct="false" />-->
+		<!--</profile>-->
+		<!--<shortcut call="getShortcuts">-->
+		<!--<entry title="便利店订单" do="orders" state="" direct="false" />-->
+		<!--</shortcut>-->
+		<rule>
+			<entry title="规则" do="rule" state="" direct="false" />
+		</rule>
+	</bindings>
+	<!--<install><![CDATA[
+CREATE TABLE `wx_weixin_gamesgoodslist` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(30) NOT NULL,
+  `gid` int(11) NOT NULL,
+  `picurl` varchar(225) DEFAULT NULL,
+  `weight` int(11) DEFAULT NULL,
+  `num` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wx_weixin_gameslist` (
+  `id` int(5) NOT NULL AUTO_INCREMENT,
+  `title` varchar(30) NOT NULL,
+  `createtime` int(11) NOT NULL COMMENT '创建时间',
+  `expirestime` int(11) NOT NULL COMMENT '有效时间',
+  `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '游戏状态\r\n0 为未开启\r\n1 为开启',
+  `usertimes` tinyint(5) DEFAULT NULL COMMENT '玩家可玩次数\r\nnull为无限次\r\n大于0 则为游戏次数',
+  `contact` varchar(225) DEFAULT NULL,
+  `whichunit` varchar(225) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `exptime` (`expirestime`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wx_weixin_goodslistforgame` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `gid` int(11) NOT NULL,
+  `goodsid` int(11) NOT NULL,
+  `time` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wx_weixin_useraction` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL COMMENT '活动id',
+  `accessIp` varchar(15) NOT NULL,
+  `accessTime` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=547 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `wx_weixin_userinfo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `openid` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `unionid` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `nickname` varchar(50) CHARACTER SET utf8 NOT NULL,
+  `sex` tinyint(1) NOT NULL,
+  `province` varchar(225) COLLATE utf8_unicode_ci DEFAULT '',
+  `city` varchar(225) COLLATE utf8_unicode_ci DEFAULT '',
+  `country` varchar(225) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `headimgurl` varchar(225) COLLATE utf8_unicode_ci NOT NULL,
+  `subscribe_time` int(11) DEFAULT NULL,
+  `subscribe_scene` enum('ADD_SCENE_PROFILE_CARD','ADD_SCENE_ACCOUNT_MIGRATION','ADD_SCENE_OTHERS','ADD_SCENE_PAID','ADD_SCENE_PROFILE_ITEM','ADD_SCENEPROFILE','ADD_SCENE_QR_CODE','ADD_SCENE_SEARCH') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'ADD_SCENE_SEARCH' COMMENT 'ADD_SCENE_SEARCH 公众号搜索，ADD_SCENE_ACCOUNT_MIGRATION 公众号迁移，ADD_SCENE_PROFILE_CARD 名片分享，ADD_SCENE_QR_CODE 扫描二维码，ADD_SCENEPROFILE LINK 图文页内名称点击，ADD_SCENE_PROFILE_ITEM 图文页右上角菜单，ADD_SCENE_PAID 支付后关注，ADD_SCENE_OTHERS 其他',
+  `tel` varchar(13) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `realname` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `realcity` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `isshortsightedness` enum('3','2','1') COLLATE utf8_unicode_ci NOT NULL DEFAULT '3' COMMENT '1 为近视  2 为非近视 3 为未选择',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nickname` (`nickname`) USING BTREE,
+  UNIQUE KEY `openid` (`openid`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='同步于微信公众号用户信息';
+
+CREATE TABLE `wx_weixin_usertogamestatus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gid` int(11) NOT NULL COMMENT '对应的活动id',
+  `uid` int(11) NOT NULL COMMENT '用户id',
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '用户状态\r\n0 禁止参加游戏\r\n1 允许参加游戏',
+  `times` int(5) DEFAULT '0' COMMENT '剩余参加次数(如果有次数的话)\r\n为空则无限次\r\n大于0 则为可参加次数',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+]]></install>
+<uninstall><![CDATA[
+    &lt;!&ndash;DROP TABLE IF EXISTS `wx_weixin_gamesgoodslist`;
+    DROP TABLE IF EXISTS `wx_weixin_gameslist`;
+    DROP TABLE IF EXISTS `wx_weixin_goodslistforgame`;
+    DROP TABLE IF EXISTS `wx_weixin_useraction`;
+    DROP TABLE IF EXISTS `wx_weixin_userinfo`;
+    DROP TABLE IF EXISTS `wx_weixin_usertogamestatus`;&ndash;&gt;
+]]></uninstall>-->
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

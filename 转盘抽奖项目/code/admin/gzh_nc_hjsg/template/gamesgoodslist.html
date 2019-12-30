@@ -1,0 +1,154 @@
+{template 'common/header'}
+<link rel="stylesheet" type="text/css" href="../addons/{php echo $_GPC['m']}/resource/css/style.css" />
+<link rel="stylesheet" type="text/css" href="../addons/{php echo $_GPC['m']}/resource/swal/dist/sweetalert2.min.css" />
+<ul class="nav nav-tabs">
+	<li class="active"><a href="{php echo $this->createWebUrl('goods', array('op'=>'display'));}">奖品列表</a></li>
+	<!-- <li><a href="{php echo $this->createWebUrl('goods', array('op'=>'edit'));}">添加奖品</a></li> -->
+</ul>
+
+<div class="main">
+	<div class="panel panel-info">
+	<div class="panel-heading">筛选</div>
+        <div class="panel-body">
+            <input type="hidden" value="{$game_id}">
+            <form method="post" class="we7-form" role="form"
+                  action="{url 'site/entry/gamesgoodslist',array('m'=>'gzh_nc_hjsg')}">
+
+                <div class="form-group">
+                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">关键字</label>
+                    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-6">
+                        <input class="form-control" name="keywords" id="" type="text" value="{$_GPC['keywords']}" placeholder="奖品名称">
+                    </div>
+
+                    <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                </div>
+
+                <!--<div class="form-group">
+                    <div class="col-xs-12 col-sm-2 col-md-1 col-lg-1">
+                        <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                    </div>
+                </div>-->
+            </form>
+            <a href="{url 'site/entry/addGameGoods',array('m'=>'gzh_nc_hjsg')}&game_id={$game_id}">添加奖品+</a>
+            {if $redis_num == 1}
+            <a href="javaScript:;" style="padding-left: 100px"> 已开启库存</a>
+            {else}
+            <a href="javaScript:;" style="padding-left: 100px" onclick="beginGames({$game_id})">未开启redis库存 点击开启</a>
+            {/if}
+
+        </div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">奖品列表</div>
+		<div class="panel-body">
+			<div class="table-responsive panel-body">
+				<table class="table table-hover" style="min-width: 300px;">
+					<thead class="navbar-inner">
+						<tr>
+							<th class="col-sm-1 text-center">ID</th>
+							<th class="col-sm-2 text-center">奖品名称</th>
+							<th class="col-sm-2 text-center">奖品缩略图</th>
+							<th class="col-sm-1 text-center">权重</th>
+							<th class="col-sm-1 text-center">发放数量</th>
+							<th class="col-sm-1 text-center">当前库存数量</th>
+							<th class="col-sm-2 text-center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						 {loop $list $index $item}
+                         <tr>
+                             <td style="text-align: center;">{$item['id']}</td>
+                             <td style="text-align: center;">{$item['title']}</td>
+                             <?php
+                                if(strpos($item['picurl'], 'https://weixin.prykweb.com/attachment') !== false){
+                                    $img = $item['picurl'];
+                                }else{
+                                    $img  = $_W['attachurl'].$item['picurl'];
+                                }
+            	             ?>
+                             <td style="text-align: center;">
+                                 <img src="{$img}" height="40px" width="40px">
+                             </td>
+                             <td style="text-align: center;">{$item['weight']}</td>
+                             <td style="text-align: center;">{$item['num']}</td>
+                             {if empty($item['redis_num']) }
+                             <td style="text-align: center;">未开启库存</td>
+                             {else}
+                             <td style="text-align: center;">{$item['redis_num']}</td>
+                             {/if}
+
+                             <td class="text-center">
+                                 <a href="{url 'site/entry/gamesgoodslistedit',array('m'=>'gzh_nc_hjsg','op'=>'gamesgoodslistedit','id'=>$item['id'],'version_id'=>$_GPC['version_id'])}&game_id={$game_id}"
+                                    class="fa fa-pencil">编辑</a>
+                                 <a class="btn btn-danger btn-xs delete" data-toggle="tooltip" data-placement="top"
+                                    title="" data-id="{$item['id']}" data-original-title="删除">删除</a>
+                             </td>
+                         </tr>
+						{/loop}
+						{if empty($list)}
+						<tr>
+							<td colspan="9">
+								暂无数据
+							</td>
+						</tr>
+						{/if}
+					</tbody>
+				</table>
+				{$pager}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{template 'common/footer'}
+<script>
+    require(["../addons/{php echo $_GPC['m']}/resource/swal/dist/sweetalert2.min.js"],function(){
+        $(function(){
+            //删除
+            $(".delete").click(function(){
+                var that=$(this);
+                var id=$(this).attr('data-id');
+                console.log(id);
+                swal({
+                    title: '确定删除吗?',
+                    text: "确定删除吗?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '删除',
+                    cancelButtonText: '取消',
+                }).then(function(isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type:"post",
+                            url:"{url 'site/entry/gamesgoodslistdel',array('m'=>$_GPC['m'],'op'=>'gamesgoodslistdel','version_id'=>$_GPC['version_id'])}",
+                            data:{id:id},
+                            dataType:'json',
+                            success:function(res){
+                                if(res.status==1){
+                                    swal('操作成功!', '操作成功!', 'success');
+                                    that.parents('tr').remove();
+                                }else{
+                                    swal('操作失败!', '操作失败!', 'error');
+                                }
+                            }
+                        })
+                    }
+                })
+            });
+        })
+    });
+
+    function beginGames($gid){
+        $.ajax({
+            url: "https://weixin.prykweb.com/weixintest/theLuckyRoller/public/beginGames/"+$gid,
+            success: function(res){
+                if(res.code == 200){
+                    location.reload();
+                }
+            }
+        })
+    }
+    </script>

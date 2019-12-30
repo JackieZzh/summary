@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<manifest xmlns="http://www.we7.cc" versionCode="">
+    <application setting="true">
+        <name><![CDATA[普瑞人内刊]]></name>
+        <identifie><![CDATA[pruir]]></identifie>
+        <version><![CDATA[1.0]]></version>
+        <type><![CDATA[other]]></type>
+        <ability><![CDATA[普瑞人内刊]]></ability>
+        <description><![CDATA[普瑞人内刊]]></description>
+        <author><![CDATA[jackie]]></author>
+        <url><![CDATA[]]></url>
+    </application>
+    <platform>
+        <subscribes>
+        </subscribes>
+        <handles>
+            <message type="text" />
+            <message type="image" />
+            <message type="voice" />
+            <message type="video" />
+            <message type="location" />
+            <message type="link" />
+            <message type="subscribe" />
+            <message type="qr" />
+            <message type="trace" />
+            <message type="click" />
+            <message type="enter" />
+        </handles>
+        <rule embed="true" />
+        <supports>
+            <item type="wxapp" />
+        </supports>
+    </platform>
+    <bindings>
+        <menu>
+            <entry title="banner" do="banner" state="" direct="false" />
+            <entry title="期刊" do="periodical" state="" direct="false" />
+            <entry title="分类" do="category" state="" direct="false" />
+            <entry title="文章" do="article" state="" direct="false" />
+        </menu>
+    </bindings>
+    <install><![CDATA[
+-- 文章管理表结构 wx_prr_article
+        CREATE TABLE IF NOT EXISTS wx_prr_article (
+        id int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '文章管理ID',
+        pid int(10) DEFAULT '1' COMMENT '期刊id',
+        cid int(10) DEFAULT '1' COMMENT '分类id',
+        uniacid int(10) NOT NULL COMMENT '应用id',
+        title varchar(255) NOT NULL COMMENT '文章标题',
+        author varchar(255) DEFAULT NULL COMMENT '文章作者',
+        image_input varchar(255) NOT NULL COMMENT '文章图片',
+        synopsis varchar(255) DEFAULT NULL COMMENT '文章简介',
+        share_title varchar(255) DEFAULT NULL COMMENT '文章分享标题',
+        share_synopsis varchar(255) DEFAULT NULL COMMENT '文章分享简介',
+        visit int(10) DEFAULT NULL COMMENT '浏览次数',
+        sort int(10) unsigned NOT NULL DEFAULT '0' COMMENT '排序',
+        content mediumtext NOT NULL COMMENT '文章内容',
+        url varchar(255) DEFAULT NULL COMMENT '原文链接',
+        status tinyint(1) unsigned NOT NULL COMMENT '状态',
+        add_time varchar(255) NOT NULL COMMENT '添加时间',
+        hide tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否隐藏',
+        admin_id int(10) unsigned NOT NULL DEFAULT '0' COMMENT '管理员id',
+        mer_id int(10) unsigned DEFAULT '0' COMMENT '商户id',
+        is_hot tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否热门(小程序)',
+        is_banner tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否轮播图(小程序)',
+        is_del tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1删除0未删除',
+        PRIMARY KEY (id)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章管理表' AUTO_INCREMENT=1 ;
+
+-- 文章分类表结构 wx_prr_article_category
+
+        CREATE TABLE IF NOT EXISTS wx_prr_article_category (
+        id int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '文章分类id',
+        pid int(11) NOT NULL DEFAULT '0' COMMENT '父级ID',
+        uniacid int(10) NOT NULL COMMENT '应用id',
+        title varchar(255) NOT NULL COMMENT '文章分类标题',
+        intr varchar(255) DEFAULT NULL COMMENT '文章分类简介',
+        image varchar(255) NOT NULL COMMENT '文章分类图片',
+        status tinyint(1) unsigned NOT NULL COMMENT '状态',
+        sort int(10) unsigned NOT NULL DEFAULT '0' COMMENT '排序',
+        is_del tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1删除0未删除',
+        add_time varchar(255) NOT NULL COMMENT '添加时间',
+        hidden tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否隐藏',
+        PRIMARY KEY (id)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='文章分类表' AUTO_INCREMENT=1 ;
+
+-- 期刊表结构 wx_prr_article_periodical
+
+        CREATE TABLE IF NOT EXISTS wx_prr_article_periodical (
+        id int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '期刊id',
+        pid int(11) NOT NULL DEFAULT '0' COMMENT '父级ID',
+        uniacid int(10) NOT NULL COMMENT '应用id',
+        title varchar(255) NOT NULL COMMENT '期刊标题',
+        intr varchar(255) DEFAULT NULL COMMENT '期刊简介',
+        image varchar(255) NOT NULL COMMENT '期刊图片',
+        status tinyint(1) unsigned NOT NULL COMMENT '状态',
+        sort int(10) unsigned NOT NULL DEFAULT '0' COMMENT '排序',
+        is_del tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1删除0未删除',
+        add_time int(11) NOT NULL COMMENT '添加时间',
+        hidden tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否隐藏',
+        PRIMARY KEY (id)
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='期刊表' AUTO_INCREMENT=1 ;
+
+-- banner表
+        CREATE TABLE IF NOT EXISTS `wx_prr_banner` (
+        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+        `title` varchar(255) DEFAULT NULL,
+        `image` varchar(255) NOT NULL,
+        `sort` int(11) NOT NULL DEFAULT '0',
+        `url` varchar(255) DEFAULT NULL COMMENT '链接',
+        `hidden` enum('1','0') NOT NULL DEFAULT '0' COMMENT '0 为显示 以为隐藏',
+        `is_del` enum('1','0') NOT NULL DEFAULT '0' COMMENT '0 为未删除 1 为已删除',
+        `add_time` int(11) DEFAULT NULL COMMENT '添加时间',
+        `uniacid` tinyint(5) NOT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+     ]]>
+    </install>
+    <uninstall><![CDATA[
+    DROP TABLE IF EXISTS `wx_prr_article`;
+    DROP TABLE IF EXISTS `wx_prr_article_category`;
+    DROP TABLE IF EXISTS `wx_prr_article_periodical`;
+    DROP TABLE IF EXISTS `wx_prr_banner`;
+    ]]>
+    </uninstall>
+    <upgrade><![CDATA[]]></upgrade>
+</manifest>
+

@@ -1,0 +1,202 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    #erweim{
+        width: 131px;
+        height: 132px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        box-shadow: 2px 2px #aaa;
+        z-index: 9999;
+        margin: 0 0;
+        padding: 0 0;
+        position: absolute;
+    }
+    #erweim .boxImg{
+        position: relative;
+        top :0;
+        left:10px;
+        width: 111px;
+        height: 111px;
+    }
+</style>
+
+<div class="content">
+    <div class="article_select_box">
+        <button class="layui-btn layui-btn-normal" id="btn-refresh">刷新</button>
+        <div>
+            <div class="demoTable">
+                <input type="hidden" id="id" value="{$id}">
+                <div class="layui-inline">
+                    <input type="text" name="title"   lay-verify="required" placeholder="请输入参与者姓名" autocomplete="off" class="layui-input searchName" id="searchInput">
+                </div>
+            </div>
+            <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+        </div>
+    </div>
+    <div>
+        <table id="demo" lay-filter="demo"></table>
+    </div>
+</div>
+
+<!--二维码弹框-->
+<!--<div style="display: none" id="erweim" data-status="1">
+    <div class="boxTitle">请用微信扫一扫</div>
+    <div class="boxImg"></div>
+</div>-->
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/html" id="avatar">
+    <img src="{{d.avatar}}" height="80%">
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        layui.use('form', function(){
+            var form = layui.form;
+            getCheckInInfo()
+        })
+    });
+    function getCheckInInfo(){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                table.render({
+                    elem: '#demo'
+                    ,height: 400
+                    ,url: "{url 'site/entry/GetCheckInInfo' array('m'=>$_GPC['m'],'op'=>'GetCheckInInfo','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 8
+                        ,limits:[8]
+                        ,first: true //不显示首页
+                        ,last: true //不显示尾页
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center'},
+                        {field: 'title', title: '活动名', width:'25%',  align: 'center'},
+                        {field: 'real_name', title: '参与者', width:'20%', align: 'center'},
+                        {field: 'avatar', title: '参与者头像', width:'15%', align: 'center', templet:"#avatar"},
+                        {field: 'check_time', title: '签到时间', width:'30%', align: 'center'}
+                    ]]
+                });
+            };
+            renderTable();
+            table.on('sort(demo)', function(obj){
+                table.reload('demo', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/GetCheckInInfo' array('m'=>$_GPC['m'],'op'=>'GetCheckInInfo','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+        });
+    }
+    function addActive(){
+        var hid = $('#hid').val(),
+            url = "https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=EditActive&m=bjhd_check_in&op=EditActive&version_id=0&type=1&hid="+hid;
+        window.open(url);
+    }
+
+    function getCode(id, title){
+        event.stopImmediatePropagation();
+        $.ajax({
+            url: "{url 'site/entry/getCode' array('m'=>$_GPC['m'],'op'=>'getCode','version_id'=>$_GPC['version_id'])}&id="+ id + "&title="+ title,
+            success:function(res){
+                layer.open({
+                    title: title
+                    ,content: res
+                });
+            }
+        })
+    }
+
+    function copyUrl(id){
+        var Url= document.getElementById("copyUrl"+id);
+        Url.select(); // 选择对象
+        document.execCommand("Copy"); // 执行浏览器复制命令
+        layer.msg('复制成功!', {time:1500, icon:1})
+    }
+
+    function changeSort(id, type){
+        var sort = $('#changeSort'+id).val();
+        var str = "&type="+type+"&id="+ id+"&sort="+sort;
+        $.ajax({
+            url:"{url 'site/entry/ChangeSort' array('m'=>$_GPC['m'],'op'=>'ChangeSort','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            success: function (res) {
+                res = $.parseJSON(res);
+                if(res.code == 200){
+                    layer.msg(res.errorMsg, {icon:1, time:1500});
+                    getActiveInfo($('#hid').val());
+                } else {
+                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                }
+            },
+            error: function (data) {}
+        });
+    }
+
+    function delInfo(type, id){
+        layer.open({
+            content: "确定删除该活动?",
+            btn: ['确定', '取消'],
+            yes: function(index){
+                var str = "&type="+type+"&id="+ id;
+                layer.load();
+                $.ajax({
+                    url:"{url 'site/entry/DelInfo' array('m'=>$_GPC['m'],'op'=>'DelInfo','version_id'=>$_GPC['version_id'])}",
+                    data: str,
+                    success: function (res) {
+                        layer.closeAll('loading');
+                        res = $.parseJSON(res);
+                        if(res.code == 200){
+                            layer.msg(res.errorMsg, {icon:1, time:1500});
+                            getActiveInfo($('#hid').val());
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    },
+                    error: function (data) {}
+                });
+                layer.close(index);
+            },
+            btn2: function (index) {
+                layer.close(index);
+            }
+        });
+    }
+</script>
+{template 'common/footer'}

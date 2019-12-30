@@ -1,0 +1,360 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<div>
+    <style type="text/css">
+        .layui-table-view .layui-table{ width:100% !important;}
+        #edui1_toolbarbox{
+            z-index: 999999999;
+        }
+        #syn{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            color: slategray;
+            margin-right: 20px;
+        }
+    </style>
+    <div class="article_select_box">
+        <button class="layui-btn layui-btn-sm" id="addArticle">
+            <i class="layui-icon">&#xe654;</i> 添加banner
+        </button>
+        <button class="layui-btn" id="btn-refresh">刷新</button>
+        <div>
+            <div class="demoTable">
+                <div class="layui-inline">
+                    <input type="text" name="title" required  lay-verify="required" placeholder="请输入banner名" autocomplete="off" class="layui-input searchName" id="searchInput">
+                </div>
+            </div>
+            <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+        </div>
+    </div>
+    <table id="demo" lay-filter="test"></table>
+</div>
+
+
+<div class="model-box">
+    <div class="form-box" style="left: 15%;width: 70%;">
+        <div class="form-title_bg">
+            <span id="form-title"></span><strong id="close_YYY" style="cursor: pointer;" class="layui-icon layui-icon-close"></strong>
+        </div>
+        <form class="layui-form" id="form" enctype="multipart/form-data" style="margin:60px 20px 20px;">
+            <input type="hidden" name="type" id="type">
+            <input type="hidden" name="bid" id="bid">
+            <div class="layui-form-item">
+                <label class="layui-form-label">标题：</label>
+                <div class="layui-input-block layui-width-35">
+                    <input type="text" lay-verify="required" name="title" id="title" autocomplete="off" class="layui-input" >
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序：</label>
+                <div class="layui-input-block layui-width-15">
+                    <input type="text" name="sort" id="sort"  autocomplete="off" class="layui-input" value="0">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">url：</label>
+                <div class="layui-input-block layui-width-15">
+                    <input type="text" name="url" id="url"  autocomplete="off" class="layui-input" value="">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">banner图：</label>
+                <div class="layui-input-block layui-width-100" id="faceBox">
+                    {php echo tpl_form_field_image('banner',$list['banner']);}
+                </div>
+                <p style=" margin-left: 110px; margin-top:10px; color: #f00; font-size: 14px;">banner图尺寸：750px * 350px </p>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">是否显示：</label>
+                <div class="layui-input-block" id="prr">
+                    <input type="radio" name="hide" value="0" title="显示" >
+                    <input type="radio" name="hide" value="1" title="隐藏">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <a class="layui-btn " id="submitBtn"></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{MODULE_URL}res/layui/layui.js"></script>
+<script src="{MODULE_URL}res/layui/common.js"></script>
+
+<!-- 操作列 -->
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<!-- 显示/隐藏 -->
+<script type="text/html" id="hiddenTpl">
+    <input type="checkbox" name="hidden" data_id="{{d.id}}" lay-event="changeHide" lay-text="显示|隐藏" lay-skin="switch" lay-filter="hiddenTpl" {{d.hidden == '0' ? "checked": ""}}>
+</script>
+<!--图片-->
+<script type="text/html" id="imageBox">
+    <image src="{{d.image}}" width='40px' height='40px'></image>
+</script>
+<!--排序-->
+<script type="text/html" id="sortBox">
+    <input id="changeSort{{d.id}}" type="text" value="{{d.sort}}" style="width: 100%; height:80%;text-align: center" onblur="changeSort({{d.id}})">
+</script>
+
+<script>
+
+    $(function(){
+        /**
+         * 生成banner列表*/
+        getArtList();
+        /*显示添加文章模态框*/
+        $("#addArticle").on('click', function(){
+            $("#form")[0].reset();
+            var form = layui.form;
+            //$('input:radio[name=is_banner]')[0].checked = false;
+            $('input:radio[name=hide]')[0].checked = false;
+            //form.render('radio');
+            //$(':input','#form').not(':button,:submit,:reset,:hidden').val('').removeAttr('checked');
+            $('#faceBox img').attr('src', '');
+            $('#submitBtn').text('新建');
+            $('#type').val(1);
+            $('#form-title').text('新建banner');
+            $('.model-box').css('display', 'block');
+            form.render();
+        });
+        /*点击蒙版关闭*/
+        $('#close_YYY').on('click', function(e){
+            $('.model-box').css('display', 'none');
+            $('.bannerImg').css('display', 'none');
+            e.stopPropagation();
+            $('.commentInput, .articleExclusive, .videoExclusive').css('display', 'none');
+            $("#form")[0].reset();
+        });
+        /*阻止冒泡*/
+        $('.form-box').on('click', function(e){
+            e.stopPropagation();
+        });
+        /*新增/编辑提交*/
+        $("#submitBtn").on('click', function () {
+            layer.load();
+            var formData = new FormData($("#form")[0]); //此处id为form表单的id
+            $.ajax({
+                url:"{url 'site/entry/addOrUpdateBanner' array('m'=>$_GPC['m'],'op'=>'addOrUpdateBanner','version_id'=>$_GPC['version_id'])}",
+                type: 'post',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getArtList();
+                            $('.model-box').css('display', 'none');
+                        });
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+    });
+    function getArtList(){
+        layui.use(['table', 'form'], function(){
+            var table = layui.table,
+                form = layui.form;
+            var renderTable = function(){
+                layer.load(2);
+                table.render({
+                    elem: '#demo'
+                    ,height: 400
+                    ,url: "{url 'site/entry/GetBanner' array('m'=>$_GPC['m'],'op'=>'GetBanner','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 10
+                        ,limits:[10,20,50,100]
+                        ,first: false //不显示首页
+                        ,last: false //不显示尾页
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'5%', sort: true,  align: 'center',fixed: 'left'},
+                        {field: 'sort', title: '排序', width:'10%', sort:true, align: 'center', templet:"#sortBox"},
+                        {field: 'image', title: 'banner图', width: '20%', align: 'center', templet: "#imageBox"},
+                        {field: 'title', title: '标题', width:'25%', align: 'left'},
+                        {field: 'hidden', title: '是否显示', width:'12%', align: 'center', templet: "#hiddenTpl"},
+                        {templet: '#oper-col', title: '编辑', width: '25%',align: 'center'}
+                    ]],
+                    done: function () {
+                        layer.closeAll('loading');
+                    }
+                });
+            };
+            renderTable();
+            table.on('sort(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                table.reload('demo', { //testTable是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var title = $('#searchInput').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/GetBanner' array('m'=>$_GPC['m'],'op'=>'GetBanner','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            title : title
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+            // 监听switch
+            form.on('switch(hiddenTpl)', function(obj){
+                var contexts;
+                var hide;
+                var x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                var aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 0;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 1;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        var str = "&type=4&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+            // 监听工具栏
+            table.on('tool(test)', function(obj){
+                var data = obj.data,
+                    event = obj.event;
+                if(event === "edit"){
+                    $("#form")[0].reset();
+                    $('#form-title').text('编辑banner');
+                    $('#title').val(data.title);
+                    $('#sort').val(data.sort);
+                    $('#bid').val(data.id);
+                    $('#url').val(data.url);
+                    $('#type').val(2);
+                    $('#faceBox img').attr('src', data.image).css('width', '150px').css('height', '80px');
+                    $(":radio[name='hide'][value='" + data.hidden + "']").attr('checked',true);
+                    form.render('radio');
+                    $('#submitBtn').text('确认修改');
+                    $('.model-box').css('display', 'block')
+                } else if (event === "del"){
+                    var str = '&id=' + data.id;
+                    layer.confirm('确定要删除?', {icon: 3, title:'提示'}, function(index){
+                        //do something
+                        layer.load();
+                        $.ajax({
+                            url:"{url 'site/entry/delBanner' array('m'=>$_GPC['m'],'op'=>'delBanner','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                        renderTable();
+                                    })
+                                } else {
+                                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                    });
+                }
+            })
+        });
+    }
+    function changeSort(id){
+        var sort = $('#changeSort'+id).val();
+        var str = "&type=4&id="+ id+"&sort="+sort;
+        $.ajax({
+            url:"{url 'site/entry/ChangeSort' array('m'=>$_GPC['m'],'op'=>'ChangeSort','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                res = $.parseJSON(res);
+                if(res.code == 200){
+                    layer.msg(res.errorMsg, {icon:1, time:1500});
+                } else {
+                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                }
+            },
+            error: function (data) {}
+        });
+    }
+
+</script>
+{template 'common/footer'}

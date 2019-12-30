@@ -1,0 +1,163 @@
+@charset "utf-8";
+html{min-width: 320px;max-width: 750px;margin: 0 auto;/* font-size: 16px; */}
+body{ background-color: #e8ebea; }
+h1,h2,h3,h4,h5,h6,p,hr,div,form{margin: 0;padding: 0;font-weight: normal;}
+ul,ol,li{margin: 0; padding: 0;}
+li{ list-style-type: none;}
+.left{ float: left;}
+
+.bg{width:100%;height: 13rem;margin: 0 auto;background: url(../images/bg.jpg) no-repeat center;background-size: 100% 100%;padding-top: 77%;/* text-align:center; */}
+.bg1{width: 100%;height: 5.5rem;background: url(../images/bg2.jpg) no-repeat center;background-size:100% 100%;}
+
+.pbox{ width: 78%; margin: 0 auto;padding: 0.3rem;text-align: center;overflow: hidden;}
+.pic{width: 27%;height: 1.1rem;padding: 5px;background-color: #fff;border: 1px solid #fff;border-radius: 10px;margin-top:8px; margin-left:2px; text-align: center;}
+
+
+
+#lottery{width: 100%;height: 5.5rem;margin:0px auto;}
+#lottery table{width: 79%;margin: 0 auto;padding-top:0.4rem; text-align: center; }
+#lottery table td{position:relative;width: 27%;height: 1.1rem;padding: 5px;background-color: #fff;border-radius: 10px;text-align: center;border: 2px solid #fe4952;}
+#lottery table td img{display:block;width:100%;}
+#lottery table td a{width:100%; height:1rem; display:block;text-decoration:none;background: url(../images/pic9.jpg) no-repeat center; background-size: 100% 100%;}
+#lottery table td a:hover{background-image:url(../images/pic9.jpg);}
+#lottery table td.active .mask{display:block;}
+.mask{
+    width:100%;
+    height:100%;
+    position:absolute;
+    left:0;
+    top:0;
+    border: 1px solid #050b23;
+    background-color:#292208;
+    opacity:0.5;
+    border-radius: 10px;
+    display:none;
+}
+
+
+.swiper-container{width: 90%;height: 0.5rem; overflow: hidden;border: 1px solid #c3322e;border-radius: 10px;margin-top:0.3rem;/* padding:0.1rem; *//* background-color:#fe484c; */}
+.swiper-slide{height: 0.5rem !important ; font-size: 16px;text-align: center;color: #fff;}
+.mp1{font-size: 15px;text-align: center;color: #fff; margin-top:0.2rem; }
+
+.rule{/* width:95%; */margin:0 auto;color: #fff;padding: 0.3rem;}
+.mp2{ font-size: 16px;}
+.mp3{font-size: 12px;}
+
+
+
+
+.online-order {position:fixed;width:300px;height: 12rem;margin:0 auto;top:0.2rem;left: 0.25rem; right:0.25rem;background: url(../images/bg.png) no-repeat center #292208;background-size: 100% 100%;text-align:center;z-index: 1;opacity: 0.9;}
+.zt-wrapper{padding-top: 5.8rem; }
+.online-order form li { margin-top:2px;
+  font-size: 18px;
+}
+
+#msgdemo { padding:5px;
+  color: red;
+  text-align: center;
+  font-size: 12px;
+}
+
+.online-order form li input[type='text'] {
+  border-radius:10px;
+  width: 35%;
+  height: 25px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  color: #000;
+}
+.action{text-align:center;}
+
+.online-order form li label { color:#fada53; font-weight:bold;font-size: 18px;}
+
+
+.online-order form .action input[type='submit'] {
+  border:none;
+  /* margin-left:2rem; */
+  font-weight:bold;
+  background: #fff;
+  color: #f87e7e;
+  font-size: 18px;
+  border-radius: 30px;
+}
+
+.online-order form .action input[type='reset'] {
+  border: none;
+  background: #008bcd;
+  color: #fff;
+  font-size: 18px;
+  border-radius: 30px;
+  padding: 6px 24px;
+}
+.yc{ margin: 0 auto; text-align: center;}
+.yc img{ width:18px; height:18px;  background-color:#fff; opacity:0.5; border-radius:50px; }
+
+
+
+.secuss {
+  display: none;
+  min-width: 300px;
+  max-width: 552px;
+  width: 100%;
+  min-height: 147px;
+  background: #fff;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  position: absolute;
+}
+
+.secuss .close {
+  position: absolute;
+  font-family: Arial;
+  background: #fff;
+  width: 20px;
+  height: 20px;
+  color: #f00;
+  font-weight: bold;
+  opacity: .7;
+  top: 0;
+  right: 5px;
+  font-size: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.secuss .tipsbox {
+  height: 147px;
+  padding-left: 88px;
+  display: table;
+}
+
+.secuss .r {
+  background: url(http://www.prykweb.com/statics/images/yuyuepic/yycgr.png) 5px 33px no-repeat;
+}
+
+.secuss .f {
+  background: url(http://www.prykweb.com/statics/images/yuyuepic/yycgf.png) 5px 33px no-repeat;
+}
+
+.secuss .cw {
+  background: url(http://www.prykweb.com/statics/images/yuyuepic/yycgcw.png) 5px 33px no-repeat;
+}
+
+.secuss .tipsbox .yytips {
+  display: table-cell;
+  vertical-align: middle;
+  font-family: Microsoft YaHei;
+}
+
+.secuss .tipsbox .yytips h3 {
+  padding-bottom: 10px;
+  font-size: 20px;
+}
+
+.secuss .tipsbox .yytips p {
+  line-height: 20px;
+}
+
+.secuss .tipsbox .yytips .yyh {
+  color: #f00;
+  font-size: 18px;
+  padding: 0 5px;
+}

@@ -1,0 +1,150 @@
+{template 'common/header'}
+<link rel="stylesheet" type="text/css" href="../addons/{php echo $_GPC['m']}/resource/css/style.css" />
+<link rel="stylesheet" type="text/css" href="../addons/{php echo $_GPC['m']}/resource/swal/dist/sweetalert2.min.css" />
+<ul class="nav nav-tabs">
+	<li class="active"><a href="{php echo $this->createWebUrl('goods', array('op'=>'display'));}">用户列表</a></li>
+	<!-- <li><a href="{php echo $this->createWebUrl('goods', array('op'=>'edit'));}">添加用户</a></li> -->
+</ul>
+
+<div class="main">
+	<div class="panel panel-info">
+	<div class="panel-heading">筛选</div>
+	<div class="panel-body">
+	<form  method="post" class="we7-form" role="form" action="{url 'site/entry/userinfo',array('m'=>'gzh_nc_hjsg')}">
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">用户来源</label>
+					<div class="col-xs-12 col-sm-8 col-md-8 col-lg-6">
+						<input class="form-control" name="keywords" id="" type="text" value="{$_GPC['keywords']}" placeholder="例如: xvk 小微客">
+					</div>
+					<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+				</div>
+			<div class="form-group">
+				<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">选择活动</label>
+				<div class="col-xs-12 col-sm-8 col-md-8 col-lg-6">
+					<select name="aid" id="aid" style="width:55%">
+						<option value="0" class="form-control">全部</option>
+						{loop $active $index $value}
+						{if $value['id'] == $isChoose}
+						<option value="{$value['id']}" selected="selected">{$value['title']}</option>
+						{else}
+						<option value="{$value['id']}" >{$value['title']}</option>
+						{/if}
+						{/loop}
+					</select>
+				</div>
+			</div>
+
+		<!--<div class="form-group">
+
+            <div class="col-xs-12 col-sm-2 col-md-1 col-lg-1">
+                <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+            </div>
+        </div>-->
+			</form>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">用户列表</div>
+		<div class="panel-body">
+			<div class="table-responsive panel-body">
+				<table class="table table-hover" style="min-width: 300px;">
+					<thead class="navbar-inner">
+						<tr>
+							<th class="col-sm-1 text-center">序列</th>
+							<th class="col-sm-1 text-center">头像</th>
+							<th class="col-sm-1 text-center">昵称</th>
+							<th class="col-sm-1 text-center">姓名</th>
+							<th class="col-sm-1 text-center">性别</th>
+							<th class="col-sm-1 text-center">城市</th>
+							<th class="col-sm-1 text-center">省份</th>
+							<th class="col-sm-1 text-center">国家</th>
+							<th class="col-sm-1 text-center">电话</th>
+							<th class="col-sm-1 text-center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						 {loop $list $index $item}
+						<tr>
+							  <td class="col-sm-1 text-center">{php echo ($pageindex-1)*$pagesize+intval($index)+1}</td>
+							<td class="col-sm-1 text-center"><img src="{$item['headimgurl']}" height="40px" width="40px"></td>
+							<td class="col-sm-1 text-center">{$item['nickname']}</td>
+							<td class="col-sm-1 text-center">{$item['realname']}</td>
+                <td class="col-sm-1 text-center">
+                    <?php
+                    if($item['sex']==0){
+                        echo "保密";
+                    }else if($item['sex']==1){
+                        echo "男";
+                    }else if($item['sex']==2){
+                        echo "女";
+                    }
+                    ?>
+                </td>
+                <td class="col-sm-1 text-center">{$item['city']}</td>
+                <td class="col-sm-1 text-center">{$item['province']}</td>
+                <td class="col-sm-1 text-center">{$item['country']}</td>
+                <td class="col-sm-1 text-center">{$item['tel']}</td>
+            
+							<td class="text-right">
+								<!-- <a href="{php echo $this->createWebUrl('goods', array('op'=>'edit', 'id'=>$goodsid));}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="" data-original-title="编辑"><i class="fa fa-pencil"></i></a> -->
+								  <a class="btn btn-danger btn-xs delete" data-id="{$item['id']}">删除</a>
+							</td>
+						</tr>
+						{/loop}
+						{if empty($list)}
+						<tr>
+							<td colspan="8">
+								暂无用户
+							</td>
+						</tr>
+						{/if}
+					</tbody>
+				</table>
+				{$pager}
+			</div>
+		</div>
+	</div>
+</div>
+
+{template 'common/footer'}
+{template 'common/footer'}
+<script>
+    console.log(1111);
+    require(["../addons/{php echo $_GPC['m']}/resource/swal/dist/sweetalert2.min.js"],function(){
+        $(function(){
+            //删除
+            $(".delete").click(function(){
+                var that=$(this);
+                var id=$(this).attr('data-id');
+                console.log(id);
+                swal({
+                    title: '确定删除吗?',
+                    text: "确定删除吗?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '删除',
+                    cancelButtonText: '取消',
+                }).then(function(isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type:"post",
+                            url:"{url 'site/entry/deluserinfo',array('m'=>$_GPC['m'],'op'=>'deluserinfo','version_id'=>$_GPC['version_id'])}",
+                            data:{id:id},
+                            dataType:'json',
+                            success:function(res){
+                                if(res.status==1){
+                                    swal('操作成功!', '操作成功!', 'success');
+                                    that.parents('tr').remove();
+                                }else{
+                                    swal('操作失败!', '操作失败!', 'error');
+                                }
+                            }
+                        })
+                    }
+                })
+            });
+        })
+    })
+    </script>

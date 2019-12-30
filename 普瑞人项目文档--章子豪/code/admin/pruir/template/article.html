@@ -1,0 +1,689 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<div>
+<style type="text/css">
+	.layui-table-view .layui-table{ width:100% !important;}
+    #edui1_toolbarbox{
+    z-index: 999999999;
+}
+    #syn{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: slategray;
+        margin-right: 20px;
+    }
+</style>
+<div class="article_select_box">
+    <button class="layui-btn layui-btn-sm" id="addArticle">
+        <i class="layui-icon">&#xe654;</i> 添加文章
+    </button>
+    <button class="layui-btn" id="btn-refresh">刷新</button>
+    <div>
+        <div class="demoTable">
+            <div class="layui-inline">
+                <select name="pids" id="doc-select-4"  lay-filter="doc-select-4" class="article-select"></select>
+            </div>
+            <div class="layui-inline">
+                <select name="cids" id="doc-select-5"  lay-filter="doc-select-5" class="article-select"></select>
+            </div>
+            <div class="layui-inline">
+                <input type="text" name="title" required  lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input searchName" id="searchInput">
+            </div>
+        </div>
+        <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+    </div>
+</div>
+    <table id="demo" lay-filter="test"></table>
+</div>
+
+
+<div class="model-box">
+    <div class="form-box" style="left: 15%;width: 70%;">
+        <div class="form-title_bg">
+            <span id="form-title"></span><strong id="close_YYY" style="cursor: pointer;" class="layui-icon layui-icon-close"></strong>
+        </div>
+        <form class="layui-form" id="form" enctype="multipart/form-data" style="margin:60px 20px 20px;">
+            <input type="hidden" name="type" id="type">
+            <input type="hidden" name="aid" id="aid">
+            <input type="hidden" name="video" id="hideVideo">
+            <input type="hidden" name="oldVideo" id="oldVideo">
+            <input type="hidden" name="articleType" id="articleType">
+            <div class="layui-form-item">
+                <label class="layui-form-label">所属期刊：</label>
+                <div class="layui-input-block layui-width-35">
+                    <select name="pid" id="doc-select-1"  lay-filter="doc-select-1"></select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">所属分类：</label>
+                <div class="layui-input-block layui-width-35">
+                    <select name="cid" id="doc-select-2" lay-filter="category"></select>
+                </div>
+            </div>
+            <div class="layui-form-item commentInput">
+                <label class="layui-form-label">标题：</label>
+                <div class="layui-input-block layui-width-35">
+                    <input type="text" lay-verify="required" name="title" id="title" autocomplete="off" class="layui-input" >
+                </div>
+            </div>
+            <div class="layui-form-item commentInput">
+                <label class="layui-form-label">作者：</label>
+                <div class="layui-input-block layui-width-15">
+                    <input type="text" name="author" id="author" autocomplete="off" class="layui-input" value="">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text commentInput">
+                <label class="layui-form-label">简介：</label>
+                <div class="layui-input-block">
+                    <textarea  class="layui-textarea" name="synopsis" id="synopsis" maxlength="255"></textarea>
+                    <span id="syn" ></span>
+                </div>
+            </div>
+            <div class="layui-form-item commentInput">
+                <label class="layui-form-label">排序：</label>
+                <div class="layui-input-block layui-width-15">
+                    <input type="text" name="sort" id="sort"  autocomplete="off" class="layui-input" value="0">
+                </div>
+            </div>
+            <div class="layui-form-item commentInput">
+                <label class="layui-form-label">缩略图：</label>
+                <div class="layui-input-block layui-width-35" id="faceBox">
+                    {php echo tpl_form_field_image('face',$list['face']);}
+                </div>
+                <p id="artTip" style=" margin-left: 110px; margin-top:10px; color: #f00; font-size: 14px;">缩略图比例为（4：3），建议尺寸：280px * 220px </p>
+                <p id="vidTip" style=" margin-left: 110px; margin-top:10px; color: #f00; font-size: 14px;">视频封面图比例为（5：3），建议尺寸：700px * 400px </p>
+            </div>
+            <div class="layui-form-item articleExclusive" id="richContent">
+                <label class="layui-form-label">编辑内容：</label>
+                <div class="layui-input-block" >
+                    {php echo tpl_ueditor('content');}
+                </div>
+            </div>
+            <div class="layui-form-item videoExclusive" id="video">
+                <label class="layui-form-label">上传视频：</label>
+                <div class="layui-input-block" >
+                    <button type="button" class="layui-btn" id="videos">
+                        <i class="layui-icon">&#xe67c;</i>上传视频
+                    </button>
+                    <div class="modelVideo" style="display: none">
+                        <video width="320" height="240" controls></video>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item articleExclusive">
+                <label class="layui-form-label">是否热门：</label>
+                <div class="layui-input-block" >
+                    <input type="radio" name="is_hot" value="0" title="非热门" >
+                    <input type="radio" name="is_hot" value="1" title="热门">
+                </div>
+            </div>
+            <!--<div class="layui-form-item articleExclusive">-->
+                <!--<label class="layui-form-label">是否banner：</label>-->
+                <!--<div class="layui-input-block">-->
+                    <!--<input type="radio" name="is_banner" value="0" title="非banner" lay-filter="banners">-->
+                    <!--<input type="radio" name="is_banner" value="1" title="banner" lay-filter="banners">-->
+                <!--</div>-->
+            <!--</div>-->
+            <div class="layui-form-item commentInput">
+                <label class="layui-form-label">是否显示：</label>
+                <div class="layui-input-block" id="prr">
+                    <input type="radio" name="hide" value="0" title="显示" >
+                    <input type="radio" name="hide" value="1" title="隐藏">
+                </div>
+            </div>
+            <div class="layui-form-item commentInput">
+                <div class="layui-input-block">
+                    <a class="layui-btn " id="submitBtn"></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="model-box2">
+  <div class="form-box2">
+      <div class="form-title_bg" style="width: 740px;">
+        <span id="form-title1">文章预览</span><strong id="close_YYYY" style="cursor: pointer;" class="layui-icon layui-icon-close"></strong>
+      </div>
+      <div class="preview_title">
+          <div class="preview_title01"></div>
+          <div class='preview_title02'>
+                作者：<a class="preview_title021">普瑞人</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="preview_title022">【普瑞纪事】</a>
+          </div>
+      </div>
+      <div class="preview_content">
+      </div>
+  </div>
+</div>
+
+
+
+<script src="{MODULE_URL}res/layui/layui.js"></script>
+<script src="{MODULE_URL}res/layui/common.js"></script>
+
+<!--<script src="{MODULE_URL}res/layui/module/dialog.js"></script>
+<script src="{MODULE_URL}res/layui/module/formate.js"></script>
+<script src="{MODULE_URL}res/layui/module/tool.js"></script>-->
+<script>
+    $(document).ready(function(){
+        $(".form-box").scroll(function(){
+            var t = $(".form-box").scrollTop();
+            if (t > 600) {
+            $("#edui1_toolbarbox").css({"position": "fixed", "top": "52px", "width": "58%" });
+            } else {
+            $("#edui1_toolbarbox").css({"position": "inherit", "top": "0", "width": "100%"});
+        }
+        });
+    });
+</script>
+
+
+<script>
+   
+    $(function(){
+        /**
+         * 生成文章列表*/
+        getArtList();
+        /**
+         * 添加期刊选项*/
+        getPeriodicalTree();
+        /**
+         * 添加分类选项*/
+        getCategoryTree();
+        /*显示添加文章模态框*/
+        $("#addArticle").on('click', function(){
+            $("#form")[0].reset();
+            var form = layui.form;
+            //$('input:radio[name=is_banner]')[0].checked = false;
+            $('input:radio[name=hide]')[0].checked = false;
+            $('input:radio[name=is_hot]')[0].checked = false;
+            form.render('radio');
+            //$(':input','#form').not(':button,:submit,:reset,:hidden').val('').removeAttr('checked');
+            $('#faceBox img').attr('src', '');
+            $('#imgBanner img').attr('src', '');
+            $('.modelVideo').css('display', 'none');
+            $('.modelVideo video').removeAttr('src');
+            UE.getEditor("content").setContent('');
+            $('#submitBtn').text('新建');
+            $('#type').val(1);
+            $('#form-title').text('新建文章');
+            $('.model-box').css('display', 'block');
+            form.render();
+        });
+        /*点击蒙版关闭*/
+        $('#close_YYY').on('click', function(e){
+            $('.model-box').css('display', 'none');
+            $('.bannerImg').css('display', 'none');
+            $('#artTip').css("display", "none");
+            $('#vidTip').css("display", "none");
+            e.stopPropagation();
+            $('.commentInput, .articleExclusive, .videoExclusive').css('display', 'none');
+            $("#form")[0].reset();
+        });
+        /*阻止冒泡*/
+        $('.form-box').on('click', function(e){
+            e.stopPropagation();
+        });
+        /*点击蒙版关闭*/
+        $('#close_YYYY').on('click', function(e){
+            $('.model-box2').css('display', 'none');
+            e.stopPropagation();
+        });
+        /*阻止冒泡*/
+        $('.form-box2').on('click', function(e){
+            e.stopPropagation();
+        });
+        /*新增/编辑提交*/
+        $("#submitBtn").on('click', function () {
+            layer.load();
+            var formData = new FormData($("#form")[0]); //此处id为form表单的id
+            $.ajax({
+                url:"{url 'site/entry/addOrUpdateArticle' array('m'=>$_GPC['m'],'op'=>'addOrUpdateArticle','version_id'=>$_GPC['version_id'])}",
+                type: 'post',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getArtList();
+                            $('.model-box').css('display', 'none');
+                        });
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+        /*改变状态*/
+        layui.use('form', function () {
+            /**
+             * 监听状态
+             */
+            var form = layui.form;
+            form.on('switch(hideStatus)', function(obj){
+                var contexts;
+                var hide;
+                var x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                var aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 0;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 1;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        var str = "&type=1&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+            // 监听下拉选项
+            form.on('select(category)', function(data){
+               var status = $(data.elem).find("option:selected").attr("data_status");
+               // 通过选项status展示对应input
+                $('.commentInput').css('display', 'block');
+                if(status == 0 || status == 1){
+                   // 文章选项 and 链接
+                    $('.articleExclusive').css('display', 'block');
+                    $('.videoExclusive').css('display', 'none');
+                    $('#articleType').val(1);
+                    $('#artTip').css("display", "block");
+                    $('#vidTip').css("display", "none")
+
+                } else if(status == 2){
+                   // 添加视频上传
+                    $('.articleExclusive').css('display', 'none');
+                    $('.videoExclusive').css('display', 'block');
+                    $('#articleType').val(2);
+                    $('#vidTip').css("display", "block");
+                    $('#artTip').css("display", "none");
+                } else {
+                   return false
+               }
+            });
+            // 监听banner选择
+            // form.on('radio(banners)', function(data){
+            //     console.log(data.value);
+            //     if(data.value == 1){
+            //         $('.bannerImg').css('display', 'block');
+            //     } else {
+            //         $('.bannerImg').css('display', 'none');
+            //     }
+            // })
+        });
+        layui.use('upload', function() {
+            var upload = layui.upload;
+            upload.render({
+                elem: '#videos' //绑定元素
+                ,url: "{url 'site/entry/uploadVideo' array('m'=>$_GPC['m'],'op'=>'uploadVideo','version_id'=>$_GPC['version_id'])}" //上传接口
+                ,accept: 'video'
+                ,size: 5000
+                ,field: 'videos'
+                ,acceptMime: 'video/*'
+                ,done: function(res){
+                    if (res.code == 200){
+                        layer.msg('上传成功!', {icon:1, time:1500});
+                        $('#hideVideo').val(res.src);
+                        $('.modelVideo').css('display', 'block');
+                        $('.modelVideo video').attr('src', res.src);
+                    } else {
+                        layer.msg(res.errMsg, {icon:5, time:1500});
+                    }
+                }
+                ,error: function(){
+                    //请求异常回调
+                }
+            });
+        });
+        // 视频预览
+        $('#previewVideos').on('click', function(){
+            var src = $(this).attr('data-src');
+            $('.modelVideo').css('display', 'block');
+            $('.modelVideo video').attr('src', src);
+        });
+
+    });
+    /**
+     * 编辑
+     * @param info
+     */
+    function editArt(id){
+        $("#form")[0].reset();
+        var str = '&aid='+id+ "&type=1";
+        $.ajax({
+            url:"{url 'site/entry/getArticleOne' array('m'=>$_GPC['m'],'op'=>'getArticleOne','version_id'=>$_GPC['version_id'])}",
+            data: str,
+            success: function (res) {
+                var form = layui.form;
+                res = JSON.parse(res);
+                if (res.code == 200){
+                    res = res.info;
+                    $('.commentInput').css('display', 'block');
+                    if(res.cStatus == 0 || res.cStatus == 1){
+                        $('.articleExclusive').css('display', 'block');
+                        $('.videoExclusive').css('display', 'none');
+                        $('#artTip').css("display", "block");
+                        $('#vidTip').css("display", "none");
+                        $('#articleType').val(1);
+                        UE.getEditor("content").setContent(res.content);
+                    } else if(res.cStatus == 2){
+                        $('.articleExclusive').css('display', 'none');
+                        $('.videoExclusive').css('display', 'block');
+                        $('#articleType').val(2);
+                        $('#artTip').css("display", "none");
+                        $('#vidTip').css("display", "block")
+                    }
+
+                    /*if(res.is_banner == 1 && res.image_banner){
+                        $('.bannerImg').css('display', 'block');
+                        $('#imgBanner img').attr('src', res.image_banner);
+                    }*/
+                    $('#form-title').text('编辑文章');
+                    $('#type').val(2);
+                    $('#aid').val(res.id);
+                    // 去除默认值
+                    $("#doc-select-1").find('option:selected').attr('selected', false);
+                    $("#doc-select-2").find('option:selected').attr('selected', false);
+                    $("#doc-select-1").val(res.pid).attr("selected",true);
+                    $("#doc-select-2").val(res.cid).attr("selected",true);
+                    form.render('select');
+                    $('.modelVideo').css('display', 'block');
+                    $('.modelVideo video').attr('src', res.video);
+                    // 用于上传新视频时 删除旧视频
+                    $('#oldVideo').val(res.video);
+                    $('#title').val(res.title);
+                    $('#author').val(res.author);
+                    $('#synopsis').val(res.synopsis);
+                    $('#sort').val(res.sort);
+                    $('#faceBox img').attr('src', res.image_input);
+                    $("input[type='radio'][name='hide'][value='" + res.hidden + "']").prop("checked", true);
+                    $(":radio[name='hide'][value='" + res.hidden + "']").attr('checked',true);
+                    $(":radio[name='hide'][value='" + res.hidden + "']").next().addClass('layui-form-radioed').children('i').addClass('layui-anim-scaleSpring');
+                    $("input[type='radio'][name='is_hot'][value='" + res.is_hot + "']").prop("checked", true);
+                    $(":radio[name='is_hot'][value='" + res.is_hot + "']").attr('checked',true);
+                    $(":radio[name='is_hot'][value='" + res.is_hot + "']").next().addClass('layui-form-radioed').children('i').addClass('layui-anim-scaleSpring');
+                    //$("input[type='radio'][name='is_banner'][value='" + res.is_banner + "']").prop("checked", true);
+                    //$(":radio[name='is_banner'][value='" + res.is_banner + "']").attr('checked',true);
+                    //$(":radio[name='is_banner'][value='" + res.is_banner + "']").next().addClass('layui-form-radioed').children('i').addClass('layui-anim-scaleSpring');
+                    $('.model-box').css('display', 'block');
+                    $('#submitBtn').text('确认修改');
+                    form.render('radio');
+                } else {
+                    layer.msg('系统开小差了, 请重试', {icon:5, time:1500});
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 预览
+     */
+    function preview(id){
+        //layer.load();
+        var str = "&aid="+ id + "&type=2";
+        $.ajax({
+            url:"{url 'site/entry/GetArticleOne' array('m'=>$_GPC['m'],'op'=>'GetArticleOne','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                res = $.parseJSON(res);
+                layer.closeAll('loading');
+                if(res.code == 200){
+                    $('.model-box2').css('display', 'block');
+                    $('.preview_content').html(res.info.content);
+                    $('.preview_title01').html(res.info.title);
+                    $('.preview_title021').text(res.info.author);
+                    $('.preview_title022').text(res.info.cTitle);
+                } else {
+
+                }
+            },
+            error: function (data) {}
+        });
+    }
+
+    /**
+     * 删除
+     */
+    function delArt(id){
+        var str = '&id=' + id;
+        layer.confirm('确定要删除?', {icon: 3, title:'提示'}, function(index){
+            //do something
+            layer.load();
+            $.ajax({
+                url:"{url 'site/entry/delArticle' array('m'=>$_GPC['m'],'op'=>'delArticle','version_id'=>$_GPC['version_id'])}",
+                type: 'get',
+                data: str,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getArtList();
+                        })
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+    }
+    function getArtList(){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                layer.load(2);
+                table.render({
+                    elem: '#demo'
+                    ,height: 400
+                    ,url: "{url 'site/entry/getArticleList' array('m'=>$_GPC['m'],'op'=>'getArticleList','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 8
+                        ,limits:[8,10,20,50,100]
+                        ,first: false //不显示首页
+                        ,last: false //不显示尾页
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'5%', sort: true,  align: 'center',fixed: 'left'},
+                        {field: 'sort', title: '排序', width:'8%', sort:true, align: 'center'},
+                        {field: 'image_input', title: '缩略图', width: '10%', align: 'center'},
+                        {field: 'title', title: '标题', width:'25%', align: 'left'},
+                        {field: 'pTitle', title: '所属期数', width:'10%', align: 'center'},
+                        {field: 'cTitle', title: '所属分类', width:'15%', align: 'center'},
+                        {field: 'hidden', title: '是否显示', width:'12%', align: 'center'},
+                        {field: 'operating', title: '编辑', width: '15%', align: 'center'}
+                    ]],
+                    done: function () {
+                        layer.closeAll('loading');
+                    }
+                });
+            };
+            renderTable();
+            table.on('sort(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                table.reload('demo', { //testTable是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var pid = $('#doc-select-4').val();
+                    var cid = $('#doc-select-5').val();
+                    var title = $('#searchInput').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/getArticleList' array('m'=>$_GPC['m'],'op'=>'getArticleList','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            title : title,
+                            pid: pid,
+                            cid: cid
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+                $("#doc-select-4 option:selected").attr('selected', false);
+                $("#doc-select-5 option:selected").attr('selected', false);
+            });
+        });
+    }
+    function changeSort(id){
+        var sort = $('#changeSort'+id).val();
+        var str = "&type=3&id="+ id+"&sort="+sort;
+        $.ajax({
+            url:"{url 'site/entry/ChangeSort' array('m'=>$_GPC['m'],'op'=>'ChangeSort','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                res = $.parseJSON(res);
+                if(res.code == 200){
+                    layer.msg(res.errorMsg, {icon:1, time:1500});
+                } else {
+                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                }
+            },
+            error: function (data) {}
+        });
+    }
+
+    /**
+     * 以树状形式填充select*/
+    function getCategoryTree(){
+        $.ajax({
+            url:"{url 'site/entry/getCategoryTree' array('m'=>$_GPC['m'],'op'=>'getCategoryTree','version_id'=>$_GPC['version_id'])}",
+            success: function (res) {
+                res = JSON.parse(res);
+                if (res.code == 200){
+                    $("#doc-select-5").empty();
+                    $("#doc-select-5").append("<option value='0'>请选择分类</option>");
+                    traversing(res.list, 5);
+
+                    $("#doc-select-2").empty();
+                    $("#doc-select-2").append("<option value='0'>请选择分类</option>");
+                    traversing(res.list, 2);
+                } else {
+                    $("#doc-select-5").append("<option value=''>暂无分类 去添加</option>");
+                    $("#doc-select-2").append("<option value=''>暂无分类 去添加</option>");
+                }
+            }
+        });
+    }
+    function getPeriodicalTree(){
+        $.ajax({
+            url:"{url 'site/entry/getPeriodicalTree' array('m'=>$_GPC['m'],'op'=>'getPeriodicalTree','version_id'=>$_GPC['version_id'])}",
+            success: function (res) {
+                res = JSON.parse(res);
+                if (res.code == 200){
+                    $("#doc-select-4").empty();
+                    $("#doc-select-4").append("<option value='0'>请选择期刊</option>");
+                    traversing(res.list,4);
+
+                    $("#doc-select-1").empty();
+                    traversing(res.list,1);
+                    $("#doc-select-1 option:last-child").attr("selected", true);
+
+                } else {
+                    $("#doc-select-4").append("<option value=''><a href=''>暂无期刊 去添加</a></option>");
+                    $("#doc-select-1").append("<option value=''><a href=''>暂无期刊 去添加</a></option>");
+                }
+            }
+        });
+    }
+    function traversing(res, which){
+        var x;
+        for ( x in res ){
+            $("#doc-select-"+which).append("<option value="+res[x].id+" data_status="+res[x].status+">"+res[x].title+"</option>");
+            if (res[x].child.length > 0){
+                traversing(res[x].child,which)
+            }
+        }
+    }
+    $("#synopsis").bind("input propertychange focus",function(){
+        var a = $(this).val(),
+            l = a.length,
+            c = 250 - l;
+        if (c > 0){
+            $('#syn').html("您还可以输入 <b>"+ c + "</b> 个字");
+        } else{
+            $('#syn').html("<b style='color:red;'>已达到最大字数!!!</b>");
+        }
+    });
+    $("#synopsis").bind("blur", function(){
+        $('#syn').html("");
+    });
+</script>
+{template 'common/footer'}

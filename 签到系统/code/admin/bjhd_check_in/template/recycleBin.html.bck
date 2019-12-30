@@ -1,0 +1,391 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    #synopsis{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: slategray;
+        margin-right: 20px;
+    }
+</style>
+
+<div class="chooseH" style="margin-bottom: 50px; width: 200px;">
+    <input type="hidden" id="index" value="0">
+    <form class="layui-form">
+        {if $length == 1 }
+        <input type="hidden" id="hid" value="{$hospitalList[0]['id']}">
+        <select name="hospital" lay-filter="chooseHospital">
+            <option value="{$hospitalList[0]['id']}">{$hospitalList[0]['title']}</option>
+        </select>
+        {else}
+        <input type="hidden" id="hid">
+        <select name="hospital" lay-filter="chooseHospital">
+            <option value="">请选择一个医院</option>
+            {loop $hospitalList $key $value}
+            <option value="{$value['id']}">{$value['title']}</option>
+            {/loop}
+        </select>
+        {/if}
+    </form>
+</div>
+
+<div class="layui-tab content" style="display: none;" lay-filter="recycle_info">
+    <ul class="layui-tab-title">
+        <li class="layui-this">活动</li>
+        <li>参与者</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show" id="deletedActiveList">
+            <div class="article_select_box">
+                <button class="layui-btn layui-btn-normal" id="btn-refresh-active">刷新</button>
+                <div>
+                    <div class="demoTable">
+                        <div class="layui-inline">
+                            <input type="text" name="title"   lay-verify="required" placeholder="活动名" autocomplete="off" class="layui-input searchName" id="searchInput_active">
+                        </div>
+                    </div>
+                    <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn_active article_select_button"  data-type="reload">搜索</button>
+                </div>
+            </div>
+            <div>
+                <table id="active" lay-filter="active"></table>
+            </div>
+        </div>
+        <div class="layui-tab-item" id="deletedParticipantList">
+            <div class="article_select_box" style="display: flex;">
+                <div style="width: 200px; margin-right: 10px">
+                    <input type="hidden" id="aid" value="">
+                    <select name="activeList"  id="activeList" style="height: 39px;width: 207px;"></select>
+                    <!--<div class="layui-form" lay-filter="chooseActiveList">
+                        <select name="activeList"  id="activeList"></select>
+                    </div>-->
+                </div>
+                <div style="display: flex;">
+                    <button class="layui-btn layui-btn-normal" id="btn-refresh">刷新</button>
+                    <div>
+                        <div class="demoTable">
+                            <div class="layui-inline">
+                                <input type="text" name="title"  placeholder="请输入参与者姓名" autocomplete="off" class="layui-input searchName" id="searchInput">
+                            </div>
+                        </div>
+                        <button class="layui-btn layui-btn-normal layui-btn-sm  article_select_button searchBtn_part"  data-type="reload">搜索</button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <table id="participant" lay-filter="participant"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/html" id="avatar">
+    <img src="https://weixin.prykweb.com/attachment/{{d.avatar_url}}" width="40px" height="40px">
+</script>
+
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" onclick="restoreData(1, {{d.id}})">恢复</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" onclick="removeCompletely(1, {{d.id}})">彻底删除</a>
+</script>
+
+<script type="text/html" id="oper-col2">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" onclick="restoreData(2, {{d.id}})">恢复</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" onclick="removeCompletely(2, {{d.id}})">彻底删除</a>
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        var a = $("#hid").val();
+        if (a != null && a != ""){
+            $('.content').css('display', 'block');
+            getActiveInfo(a);
+        }
+
+        layui.use('element', function(){
+            var element = layui.element;
+            /*element.on('tab(recycle_info)', function(data){
+                var index = data.index,
+                    h = $("#hid").val();
+                if(index == 0){
+                    if (h != null && h != ""){
+                        $('.content').css('display', 'block');
+                        getActiveInfo(h);
+                    }
+                } else if (index == 1) {
+                    getActiveInfoList(h, 1);
+                }
+            });*/
+        });
+
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('select(chooseHospital)', function(data){
+                // 根据选择的医院 显示对应医院活动列表 并更新参与者
+                var hid = data.value;
+                if(hid != null && hid != ''){
+                    $('.content').css('display', 'block');
+                    if ($('#hid').val() == hid){
+                        return false
+                    }  else {
+                        $('#hid').val(hid);
+                        getActiveInfo(hid);
+                    }
+                } else {
+                    return false
+                }
+            })
+        });
+
+        $('#activeList').change(function(){
+            var a = $(this).val(),
+                aid = $('#aid').val();
+            if (aid == a){
+                return false
+            } else {
+                $('#aid').val(a);
+                getParticipantInfo(a)
+            }
+        })
+
+    });
+
+    function getParticipantInfo(aid){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                table.render({
+                    elem: '#participant'
+                    ,height: 400
+                    ,url: "{url 'site/entry/RecyclePart' array('m'=>$_GPC['m'],'op'=>'RecyclePart','version_id'=>$_GPC['version_id'])}&aid="+ aid
+                    ,page: {
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']
+                        ,limit: 8
+                        ,limits:[8]
+                        ,first: true //不显示首页
+                        ,last: true //不显示尾页
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center'},
+                        {field: 'name', title: '参与者', width:'20%',  align: 'left'},
+                        {field: 'avatar_url', title: '头像', width:'20%', align: 'center', templet:"#avatar"},
+                        {templet: '#oper-col2', title: '操作', width: '50%', align: 'center'}
+                    ]]
+                });
+            };
+            renderTable();
+            table.on('sort(participant)', function(obj){
+                table.reload('participant', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput').val();
+                    console.log(condition);
+                    table.reload('participant',{
+                        method:'post',
+                        url:"{url 'site/entry/RecyclePart' array('m'=>$_GPC['m'],'op'=>'RecyclePart','version_id'=>$_GPC['version_id'])}&aid="+ aid,
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr: 1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn_part').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+        });
+    }
+
+    function getActiveInfoList(hid, type){
+        $.ajax({
+            url: "{url 'site/entry/GetActiveLists' array('m'=>$_GPC['m'],'op'=>'GetActiveLists','version_id'=>$_GPC['version_id'])}",
+            data: {
+                hid: hid
+            },
+            success: function(res){
+                res = JSON.parse(res);
+                if (res.code == 200){
+                    var data = res.data;
+                    $('#activeList').html(' ');
+                    for(x in data){
+                        $('#activeList').append("<option value="+data[x].id+" >"+data[x].title+"</option>");
+                    }
+                    if(type == 1){
+                        $('#aid').val(data[0].id);
+                        getParticipantInfo(data[0].id)
+                    }
+                }
+            },
+            complete: function(){
+                // 失效了 没查出原因
+                /*layui.use('form', function(){
+                    var form = layui.form;
+                    form.render("select", "chooseActiveList")
+                });*/
+            }
+        })
+    }
+
+    function getActiveInfo(hid){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                layer.load(2);
+                table.render({
+                    elem: '#active'
+                    ,height: 400
+                    ,url: "{url 'site/entry/RecycleActive' array('m'=>$_GPC['m'],'op'=>'RecycleActive','version_id'=>$_GPC['version_id'])}"
+                    ,page: {
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']
+                        ,limit: 8
+                        ,limits:[8]
+                        ,first: true //不显示首页
+                        ,last: true //不显示尾页
+                    }
+                    ,where:{
+                        hid: hid
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center'},
+                        {field: 'title', title: '活动名', width:'50%',  align: 'left'},
+                        {templet: '#oper-col', title: '操作', width: '40%', align: 'center'}
+                    ]],
+                    done: function () {
+                        layer.closeAll('loading');
+                    }
+                });
+            };
+            renderTable();
+            table.on('sort(active)', function(obj){
+                table.reload('active', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput_active').val();
+                    table.reload('active',{
+                        method:'post',
+                        url:"{url 'site/entry/RecycleActive' array('m'=>$_GPC['m'],'op'=>'RecycleActive','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn_active').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh-active').click(function () {
+                renderTable();
+                $('#searchInput_active').val('');
+            });
+        });
+    }
+
+    function restoreData(type, id){
+        layer.open({
+            content: '确定恢复吗? 确定后即刻生效',
+            btn: ['确定', '取消'],
+            yes: function(index){
+                layer.load();
+                $.ajax({
+                    url: "{url 'site/entry/RestoreData' array('m'=>$_GPC['m'],'op'=>'RestoreData','version_id'=>$_GPC['version_id'])}",
+                    data: {
+                        type: type,
+                        id: id
+                    },
+                    success: function(res){
+                        layer.closeAll('loading');
+                        res = JSON.parse(res);
+                        if(res.code == 200){
+                            layer.msg(res.errorMsg, {icon:1, time:1500});
+                            if(type == 1){
+                                getActiveInfo($("#hid").val());
+                            }else if(type == 2){
+                                getParticipantInfo($("#aid").val());
+                            }
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    }
+                });
+                layer.close(index);
+            },
+            btn2: function (index, layero) {
+                layer.close(index);
+            }
+        });
+
+    }
+
+    function removeCompletely(type, id){
+        layer.open({
+            content: '是否彻底删除? 删除后无法恢复',
+            btn: ['确定', '取消'],
+            yes: function(index){
+                layer.load();
+                $.ajax({
+                    url: "{url 'site/entry/RemoveCompletely' array('m'=>$_GPC['m'],'op'=>'RemoveCompletely','version_id'=>$_GPC['version_id'])}",
+                    data: {
+                        type: type,
+                        id: id
+                    },
+                    success: function(res){
+                        layer.closeAll('loading');
+                        res = JSON.parse(res);
+                        if(res.code == 200){
+                            layer.msg(res.errorMsg, {icon:1, time:1500});
+                            getActiveInfo($('#hid').val());
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    }
+                });
+                layer.close(index);
+            },
+            btn2: function(index){
+                layer.close(index);
+            }
+        })
+    }
+
+</script>
+
+{template 'common/footer'}

@@ -1,0 +1,171 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    .allPeople{
+        float: right;
+        margin-top: 10px;
+    }
+</style>
+
+<input type="hidden" id="aid" value="{$aid}">
+<input type="hidden" id="pid" value="{$pid}">
+<div class="layui-tab layui-tab-brief" lay-filter="tabBox">
+    <ul class="layui-tab-title">
+        <li>
+            <a href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=activeResInfo&m=vote_active&op=activeResInfo&version_id=0&aid={$aid}">统计图</a>
+        </li>
+        <li class="layui-this" >
+            <a href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=activeResInfo2&m=vote_active&op=activeResInfo2&version_id=0&aid={$aid}">数据列表</a>
+        </li>
+    </ul>
+    <div class="layui-tab-content"></div>
+</div>
+<div class="content">
+    <div class="article_select_box">
+        <button class="layui-btn layui-btn-normal" id="btn-refresh">刷新</button>
+        <div>
+            <div class="demoTable">
+                <div class="layui-inline">
+                    <input type="text" name="title" lay-verify="required" placeholder="参与者姓名 / ID" autocomplete="off" class="layui-input searchName" id="searchInput">
+                </div>
+            </div>
+            <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+            <div class="allPeople">当前总参与投票人数: <b id="allPart"></b></div>
+        </div>
+    </div>
+    <div>
+        <table id="demo" lay-filter="demo"></table>
+    </div>
+</div>
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/html" id="voter">
+    <img src="{{d.headimgurl}}" width='40px' height='40px'> 昵称:{{d.nickname}}
+</script>
+
+<script type="text/html" id="part">
+    <img src="/attachment/{{d.avatar_url}}" width='40px' height='40px'> 姓名: {{d.name}} ID: {{d.pid}}
+</script>
+
+<!--操作列-->
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-danger layui-btn-xs"  target="_blank" href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=detailOne&m=vote_active&op=detailOne&version_id=0&aid={{d.aid}}&id={{d.id}}">详情</a>
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        layui.use('element', function(){
+            var element = layui.element;
+        });
+        var a = $("#aid").val(),
+            p = $('#pid').val();
+
+        if(p != 0 && p !== null && p!== ''){
+            if (a != null && a != ""){
+                getActiveInfo(a, p);
+                $('#searchInput').val(p)
+            }
+        } else {
+            if (a != null && a != ""){
+                getActiveInfo(a, '')
+            }
+        }
+
+        getAllNum(a)
+
+    });
+
+    function getAllNum(aid){
+        $.ajax({
+            url: "{url 'site/entry/GetNotRepeatingNum' array('m'=>$_GPC['m'],'op'=>'GetNotRepeatingNum','version_id'=>$_GPC['version_id'])}",
+            data: {
+                aid: aid
+            },
+            success: function(res){
+                res = JSON.parse(res);
+                if(res.code == 200){
+                    $("#allPart").html(res.num).css('color', 'red');
+                } else{
+                    $("#allPart").html(res.errorMsg).css('color', 'red');
+                }
+            }
+        })
+    }
+
+    function getActiveInfo(aid, pid){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                layer.load(2);
+                table.render({
+                    elem: '#demo'
+                    ,height: 400
+                    ,url: "{url 'site/entry/GetActiveResInfo' array('m'=>$_GPC['m'],'op'=>'GetActiveResInfo','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 8
+                        ,limits:[8, 20, 50, 100, 500]
+                    }
+                    ,where: {
+                        aid: aid,
+                        search: pid
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center'},
+                        {field: 'nickname', title: '投票者', width:'17%', align: 'left', templet:"#voter"},
+                        {field: 'openid', title: '投票者openId', width:'18%', align: 'left'},
+                        {field: 'name', title: '参与者', width:'22%',  align: 'left', templet:"#part"},
+                        {field: 'time', title: '投票时间', width:'15%', align: 'center'},
+                        {field: 'accessIp', title: 'IP', width:'15%', align: 'center'},
+                        {field: 'addr', title: '位置信息', width:'18%', align: 'center'},
+                        /*{templet: '#oper-col', title: '详情', width: '20%', align: 'center'}*/
+                    ]],
+                    done: function () {
+                        layer.closeAll('loading');
+                    }
+                });
+            };
+            renderTable();
+            table.on('sort(demo)', function(obj){
+                table.reload('demo', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/GetActiveResInfo' array('m'=>$_GPC['m'],'op'=>'GetActiveResInfo','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+        });
+    }
+</script>
+{template 'common/footer'}

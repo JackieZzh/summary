@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    {load href="../static/js/jquery-3.3.1.min.js" /}
+    {load href="../static/layui/css/layui.css" /}
+
+    <title>{$webData['active']['title']}</title>
+</head>
+<body>
+    {if $webData['code'] == 200 }
+    <input type="hidden" id="a_id" value="{$webData['active']['id']}">
+    <input type="hidden" id="id" value="{$webData['voter']['id']}">
+    <input type="hidden" id="status" value="{$webData['voter']['status']}">
+    <input type="hidden" id="check" value="{$webData['check']}">
+    {if $webData['check'] == 1}
+    <input type="hidden" id="check_time" value="{$webData['check_time']}">
+    {else/}
+        <div class="errorMsg"></div>
+    {/if}
+    {else/}
+    <div>{$webData['errorMsg']}</div>
+    {/if}
+
+    <!--<div id="box" style="display: none;">
+        <form action="input"></form>
+    </div>-->
+</body>
+{load href="../static/layui/layui.all.js" /}
+<script>
+    $(function(){
+        var check = $('#check').val();
+
+        function check_in(){
+            var s = $('#status').val(),
+                id = $('#id').val(),
+                a_id = $('#a_id').val();
+
+            if(s == 2){
+                layer.prompt({
+                    title: '请输入真实姓名',
+                    maxlength: 10,
+                    btn: ['签到', '取消']
+                },function(value, index, elem){
+                    if(value){
+                        $.ajax({
+                            type: "post",
+                            url: "{:url('/doCheck')}",
+                            data:{
+                                name: value,
+                                id: id,
+                                a_id: a_id
+                            },
+                            success: function(res){
+                                res = JSON.parse(res);
+                                if (res.code == 200){
+                                    layer.close(index);
+                                    layer.msg('签到成功! 请找现场工作人员领取奖品!', {icon:1, time:0}/*, function(){
+                                        /!*$('#status').val(1);
+                                        $('#check_btn').remove();*!/
+                                    }*/)
+                                } else {
+                                    layer.msg(res.errorMsg, {icon:2, time: 2000})
+                                }
+                            }
+                        });
+                    } else {
+                        return false
+                    }
+
+
+                });
+            } else {
+                $.ajax({
+                    type: "post",
+                    url: "{:url('/doCheck')}",
+                    data:{
+                        id: id,
+                        a_id: a_id
+                    },
+                    success: function(res){
+                        res = JSON.parse(res);
+                        if (res.code == 200){
+                            layer.msg('签到成功! 请找现场工作人员领取奖品!', {icon:1, time:0}/*, function(){
+                                $('#status').val(1);
+                                $('#check_btn').remove();
+                                $('.errorMsg').html('您已签到!');
+                            }*/)
+                        } else {
+                            layer.msg(res.errorMsg, {icon:2, time: 2000})
+                        }
+                    }
+                });
+            }
+        }
+
+        if (check == 2){
+            check_in()
+        } else {
+            layer.msg('您已于 '+$('#check_time').val()+' 签到成功!', {icon:1, time:0})
+        }
+    });
+</script>
+</html>

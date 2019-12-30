@@ -1,0 +1,118 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    #synopsis{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: slategray;
+        margin-right: 20px;
+    }
+</style>
+
+
+<div class="top" >
+    {if $type == 1 }
+    <span>添加医院</span>
+    {else}
+    <span style="font-size: 20px;margin-bottom: 50px">医院名: {$data['title']}</span>
+    <p>创建者: {$data['add_operator']}</p>
+    <p>创建时间: {$data['add_time']}</p>
+    {/if}
+</div>
+
+<div class="layui-tab-item layui-show">
+    <form class="layui-form" id="form" enctype="multipart/form-data">
+        <input type="hidden" name="type" id="type" value="{$type}">
+        <input type="hidden" name="id" id="id" value="{$data['id']}">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">医院名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" lay-verify="required" autocomplete="off"  class="layui-input" value="{$data['title']}" maxlength="50">
+                </div>
+            </div>
+        </div>
+        <div class="layui-inline ">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-block">
+                <input type="text" name="sort" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['sort']}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">显隐</label>
+            <div class="layui-input-block">
+                {if $data['is_show'] == 1}
+                <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏"  checked>
+                {else}
+                <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏" >
+                {/if}
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <a class="layui-btn" id="submitBtn" lay-submit lay-filter="submitBtn"></a>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+        var type = $('#type').val();
+
+        if (type == 1){
+            $('#submitBtn').text('确认添加');
+        } else {
+            $('#submitBtn').text('确认修改');
+        }
+
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('submit(submitBtn)', function(){
+                // 添加 or 修改
+                var formData = new FormData($("#form")[0]); //此处id为form表单的id
+                $.ajax({
+                    url:"{url 'site/entry/addOrUpdateHospital' array('m'=>$_GPC['m'],'op'=>'addOrUpdateHospital','version_id'=>$_GPC['version_id'])}",
+                    type: 'post',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        res = JSON.parse(res);
+                        if(res.code == 200){
+                            if (type == 1){
+                                layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                    layer.confirm('是否继续添加?', {icon: 3, title:'提示'}, function(index){
+                                        alert(123)
+                                    });
+                                });
+                            } else {
+                                layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                    history.back(-1)
+                                });
+                            }
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    },
+                    error: function (data) {}
+                });
+                return false;
+            })
+        });
+
+
+    });
+
+</script>
+
+{template 'common/footer'}

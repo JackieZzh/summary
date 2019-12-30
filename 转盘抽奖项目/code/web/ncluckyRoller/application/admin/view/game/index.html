@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{$data.title}抽奖游戏临时后台</title>
+    <style>
+        .userInfo{
+            margin-bottom:10px;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="gameStatus">
+        <span>游戏状态:{$data.gameStatus.status}</span> <br>
+        <span>开始时间:{$data.gameStatus.createtime}</span> <br>
+        <span>结束时间:{$data.gameStatus.expirestime}</span> <br>
+    </div>
+
+    <div class="userList">
+        {volist name="$data.userGoodsList" id="vo"}
+        <div class="userInfo">用户{$vo.realname} 电话号码:{$vo.tel} 于 {$vo.time} 获取 {$vo.title}</div>
+        {/volist}
+    </div>
+</body>
+</html>

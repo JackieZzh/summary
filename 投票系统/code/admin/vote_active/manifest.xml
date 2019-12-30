@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<manifest xmlns="http://www.we7.cc" versionCode="">
+    <application setting="true">
+        <name><![CDATA[投票系统]]></name>
+        <identifie><![CDATA[vote_active]]></identifie>
+        <version><![CDATA[1.0]]></version>
+        <type><![CDATA[other]]></type>
+        <ability><![CDATA[投票系统]]></ability>
+        <description><![CDATA[投票系统]]></description>
+        <author><![CDATA[jackie]]></author>
+        <url><![CDATA[]]></url>
+    </application>
+    <platform>
+        <subscribes>
+        </subscribes>
+        <handles>
+            <message type="text" />
+            <message type="image" />
+            <message type="voice" />
+            <message type="video" />
+            <message type="location" />
+            <message type="link" />
+            <message type="subscribe" />
+            <message type="qr" />
+            <message type="trace" />
+            <message type="click" />
+            <message type="enter" />
+        </handles>
+        <rule embed="true" />
+        <supports>
+            <item type="app" />
+        </supports>
+    </platform>
+    <bindings>
+        <menu>
+            <entry title="帮助" do="help" state="" direct="false" />
+            <entry title="回收站" do="recycleBin" state="" direct="false" />
+            <entry title="权限管理" do="permission" state="" direct="false" />
+            <entry title="医院管理" do="hospital" state="" direct="false" />
+            <entry title="活动管理" do="active" state="" direct="false" />
+        </menu>
+    </bindings>
+    <install><![CDATA[
+
+     ]]>
+    </install>
+    <uninstall><![CDATA[
+
+    ]]>
+    </uninstall>
+    <upgrade><![CDATA[]]></upgrade>
+</manifest>
+

@@ -1,0 +1,59 @@
+<?php
+namespace app\index\controller;
+use think\Controller;
+use wx\weixinUser;
+use think\cache\driver\Redis;
+
+class WeChat extends Controller
+{
+    public function onlogin()
+    {
+        $code = input("post.code");
+        $encryptedData = input("post.encryptedData"); //用户加密数据
+        $iv = input("post.iv"); //偏移向量
+
+        $wx = new weixinUser;
+        $res = $wx->xcxLogin($code);
+        if($res["session_key"]){
+            // 解密数据
+            $sessionKey = $res["session_key"];
+        }
+
+
+
+        // 这里解密用到的key就是获得的session_key，然后对其进行base64_decode操作
+        $key = base64_decode($sessionKey);
+        // iv是微信返回给你的向量，同样进行base64_decode操作
+        $iv = base64_decode($iv);
+        // 调用aes类，注意解密方法是AES-128-CBC
+        $info = json_encode(openssl_decrypt($encryptedData, "AES-128-CBC", $key, 0, $iv));
+
+        // 判断用户是否参加
+        if($info){
+            $openId = $info->openId;
+        } else {
+            return "网络链接错误, 请重试";
+        }
+        // 活动编号 这里暂定为 lucky
+        $activeId = "lucky";
+
+        // 查看redis 记录
+        $redis = new redis();
+        $handler = $redis->handler();
+
+        //$handler->del($activeId.$openId);
+        $op = $handler->get($activeId.$openId);
+        if( !$op ){ // 没有则添加
+            $handler->set($activeId.$openId, 1);
+            $op = $handler->get($activeId.$openId);
+            // 方法1 通过redis list 保存一个参加者队列
+            $handler->lPush($activeId."userList", $openId);
+
+            //todo 方法2 加入参加者数据库 暂时手动设置中奖者
+
+        }
+        return  $op;
+
+    }
+
+}

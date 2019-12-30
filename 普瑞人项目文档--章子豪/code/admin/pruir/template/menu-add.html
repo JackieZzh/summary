@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>网站后台管理模版</title>
+        <link rel="stylesheet" href="../res/layui/css/layui.fl.css" />
+	</head>
+	<body>
+		<div class="wrap-container">
+			<form class="layui-form" style="width: 90%;padding-top: 20px;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">父级：</label>
+						<div class="layui-input-block">
+							<select name="category" lay-verify="required">
+								<option value=""></option>
+								<option value="0">作为一级菜单</option>
+								<option value="1">菜单管理</option>
+								<option value="2">&nbsp;&nbsp;&nbsp;&nbsp;├─后台菜单</option>
+								<option value="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─菜单列表</option>
+								<option value="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─菜单添加</option>
+								<option value="2">&nbsp;&nbsp;&nbsp;&nbsp;├─前台菜单</option>
+								<option value="3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─菜单列表</option>
+								<option value="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─菜单添加</option>
+							</select>
+						</div>
+
+					</div>
+					<div class="layui-form-item">
+					    <label class="layui-form-label">标题：</label>
+					    <div class="layui-input-block">
+					        <input type="text" name="title" id="title" autocomplete="off" class="layui-input" >
+					    </div>
+					</div>
+					<div class="layui-form-item layui-form-text">
+					    <label class="layui-form-label">请填写描述：</label>
+					    <div class="layui-input-block">
+					        <textarea  class="layui-textarea" name="intr" id="intr" ></textarea>
+					    </div>
+					</div>
+                    
+					<div class="layui-form-item">
+					    <label class="layui-form-label">封面图：</label>
+					    <div class="layui-input-block" id="faceBox">
+					        {php echo tpl_form_field_image('face',$list['face']);}
+					    </div>
+					</div>
+					<div class="layui-form-item">
+					    <label class="layui-form-label">排序：</label>
+					    <div class="layui-input-block">
+					        <input type="text" name="sort" id="sort"  autocomplete="off" class="layui-input" value="0">
+					    </div>
+					</div>
+					<div class="layui-form-item">
+					    <label class="layui-form-label">链接：</label>
+					    <div class="layui-input-block">
+					        <input type="text" name="url" id="url"  autocomplete="off" class="layui-input" placeholder="文章分类请不要填写">
+					    </div>
+					</div>
+					<div class="layui-form-item">
+					    <label class="layui-form-label">是否显示</label>
+					    <div class="layui-input-block" id="prr">
+					        <input type="radio" name="hidden" value="0" title="显示" >
+					        <input type="radio" name="hidden" value="1" title="隐藏">
+					    </div>
+					</div>
+                    
+					
+
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button class="layui-btn layui-btn-normal" lay-submit lay-filter="formDemo">立即提交：</button>
+							<button type="reset" class="layui-btn layui-btn-primary">重置：</button>
+						</div>
+					</div>
+				</form>
+		</div>
+
+		<script src="../res/layui/layui.all.js"></script>
+
+		<script>
+			//Demo
+			layui.use(['form'], function() {
+				var form = layui.form;
+				form.render();
+				//监听提交
+				form.on('submit(formDemo)', function(data) {
+					layer.msg(JSON.stringify(data.field));
+					return false;
+				});
+			});
+		</script>
+	</body>
+
+</html>

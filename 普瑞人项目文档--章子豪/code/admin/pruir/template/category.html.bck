@@ -1,0 +1,481 @@
+{template 'common/header'}
+
+<link rel="stylesheet" href="{MODULE_URL}res/layui/css/layui.fl.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+
+	<div class="page-content-wrap">
+        <form class="layui-form" action="">
+
+                    <button class="layui-btn layui-btn-small layui-btn-normal addBtn hidden-xs" data-url="../addons/pruir/template/menu-add.html"><i class="layui-icon">&#xe654;</i>添加分类</button>
+
+
+        </form>
+        <div class="layui-form" id="table-list">
+            <table class="layui-table" lay-skin="line">
+                <colgroup>
+                    <col width="50">
+                    <col class="hidden-xs" width="50">
+                    <col class="hidden-xs" width="100">
+                    <col class="hidden-xs" width="100">
+                    <col>
+                    <col width="80">
+                    <col width="130">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" name="" lay-skin="primary" lay-filter="allChoose"></th>
+                        <th class="hidden-xs">ID</th>
+                        <th class="hidden-xs">排序</th>
+                        <th class="hidden-xs">应用</th>
+                        <th>菜单名称</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {if $tree['code'] == 200}
+                    {loop $tree['list'] $index $item}
+                    {if $item['pid'] == 0}
+                    <tr id="node-{$item['id']}" class="parent collapsed">
+                        <td><input type="checkbox" name="" lay-skin="primary" data-id="{$item['id']}"></td>
+                        <td class="hidden-xs">{$item['id']}</td>
+                        <td class="hidden-xs"><input type="text" name="title" autocomplete="off" class="layui-input" value="{$item['sort']}" data-id="1"></td>
+                        <td class="hidden-xs">{$item['title']}</td>
+                        <td>{$item['title']}
+                            {if $item['child']}
+                            <a class="layui-btn layui-btn-mini layui-btn-normal showSubBtn" data-id="{$item['id']}">+</a>
+                            {else}
+                            {/if}
+                        </td>
+                        <td>
+                            {if $item['hidden'] == 0}
+                            <button class="layui-btn layui-btn-mini layui-btn-normal table-list-status" data-status="{$item['id']}">显示 </button>
+                            {else}
+                            <button class="layui-btn layui-btn-mini layui-btn-normal table-list-status" data-status="{$item['id']}">隐藏 </button>
+                            {/if}
+                        </td>
+                        <td>
+                            <div class="layui-inline">
+                                <button class="layui-btn layui-btn-mini layui-btn-normal  add-btn" data-id="{$item['id']}" data-url="menu-add.html"><i class="layui-icon">&#xe654;</i></button>
+                                <button class="layui-btn layui-btn-mini layui-btn-normal  edit-btn" data-id="{$item['id']}" data-url="menu-add.html"><i class="layui-icon">&#xe642;</i></button>
+                                <button class="layui-btn layui-btn-mini layui-btn-danger del-btn" data-id="{$item['id']}" data-url="menu-add.html"><i class="layui-icon">&#xe640;</i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    {else}
+                    <tr id="node-{$item['id']}" class="child-node-{$item['pid']} parent collapsed" style="display:none ;" parentid="{$item['pid']}">
+                        <td><input type="checkbox" name="" lay-skin="primary" data-id="{$item['id']}"></td>
+                        <td class="hidden-xs">{$item['id']}</td>
+                        <td class="hidden-xs"><input type="text" name="title" autocomplete="off" class="layui-input" value="{$item['sort']}" data-id="{$item['id']}"></td>
+                        <td class="hidden-xs">{$item['title']}</td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$item['title']}
+                            {if $item['child']}
+                            <a class="layui-btn layui-btn-mini layui-btn-normal showSubBtn" data-id="{$item['id']}">+</a>
+                            {else}
+                            {/if}
+                        </td>
+                        <td>
+                            {if $item['hidden'] == 0}
+                            <button class="layui-btn layui-btn-mini layui-btn-normal table-list-status" data-status="{$item['id']}">显示 </button>
+                            {else}
+                            <button class="layui-btn layui-btn-mini layui-btn-normal table-list-status" data-status="{$item['id']}">隐藏 </button>
+                            {/if}
+                        <td>
+                            <div class="layui-inline">
+                                <button class="layui-btn layui-btn-mini layui-btn-normal  add-btn" data-id="{$item['id']}" data-url="menu-add.html"><i class="layui-icon">&#xe654;</i></button>
+                                <button class="layui-btn layui-btn-mini layui-btn-normal  edit-btn" data-id="{$item['id']}" data-url="menu-add.html"><i class="layui-icon">&#xe642;</i></button>
+                                <button class="layui-btn layui-btn-mini layui-btn-danger del-btn" data-id="{$item['id']}" data-url="menu-add.html"><i class="layui-icon">&#xe640;</i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    {/if}
+                    {/loop}
+                    {else}
+                    <tr>暂无数据</tr>
+                    {/if}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+<!--<div>
+    <button class="layui-btn layui-btn-sm" id="addCategory">
+        <i class="layui-icon">&#xe654;</i> 添加分类
+    </button>
+    <table id="demo" lay-filter="test"></table>
+</div>
+<div class="model-box" >
+    <div class="form-box">
+        <span id="form-title"></span>
+        <form class="layui-form" id="form" enctype="multipart/form-data">
+            <input type="hidden" name="type" value="" id="type">
+            <input type="hidden" name="catId" value="" id="catId">
+            <div class="layui-form-item">
+                <label class="layui-form-label">父级</label>
+                <div class="layui-input-block">
+                    <select name="pid" id="doc-select-1">
+                        <option value="0">顶级分类</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">标题</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" id="title" autocomplete="off" class="layui-input" >
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">请填写描述</label>
+                <div class="layui-input-block">
+                    <textarea  class="layui-textarea" name="intr" id="intr" ></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">封面图</label>
+                <div class="layui-input-block" id="faceBox">
+                    {php echo tpl_form_field_image('face',$list['face']);}
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-input-block">
+                    <input type="text" name="sort" id="sort"  autocomplete="off" class="layui-input" value="0">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">链接</label>
+                <div class="layui-input-block">
+                    <input type="text" name="url" id="url"  autocomplete="off" class="layui-input" placeholder="文章分类请不要填写">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">是否显示</label>
+                <div class="layui-input-block" id="prr">
+                    <input type="radio" name="hidden" value="0" title="显示" >
+                    <input type="radio" name="hidden" value="1" title="隐藏">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <a class="layui-btn " id="submitBtn"></a>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>-->
+
+<script src="{MODULE_URL}res/layui/layui.all.js"></script>
+<script src="{MODULE_URL}res/layui/common.js"></script>
+
+<script>
+    $(function(){
+        /**
+         * 生成分类列表*/
+        getCatList();
+        /**
+         * 添加分类选项*/
+        getCategoryTree();
+        /*显示添加期刊模态框*/
+        $("#addCategory").on('click', function(){
+            $("#form")[0].reset();
+            $('.input-group img').css('src', '');
+            $('#submitBtn').text('新建');
+            $('#type').val(1);
+            $('#form-title').text('新建分类');
+            $('.model-box').css('display', 'block');
+        });
+        /*点击蒙版关闭*/
+        $('.model-box').on('click', function(e){
+            $('.model-box').css('display', 'none');
+            e.stopPropagation();
+        });
+        /*阻止冒泡*/
+        $('.form-box').on('click', function(e){
+            e.stopPropagation();
+        });
+        /*新增/编辑提交*/
+        $("#submitBtn").on('click', function () {
+            layer.load();
+            let formData = new FormData($("#form")[0]); //此处id为form表单的id
+            $.ajax({
+                url:"{url 'site/entry/addOrUpdateCategory' array('m'=>$_GPC['m'],'op'=>'addOrUpdateCategory','version_id'=>$_GPC['version_id'])}",
+                type: 'post',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getCatList();
+                            if($('#type').val() == 1){
+                                getCategoryTree();
+                            }
+                            $('.model-box').css('display', 'none');
+                        });
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+
+        /*改变状态*/
+        layui.use('form', function () {
+            /**
+             * 监听状态
+             */
+            let form = layui.form;
+            form.on('switch(hideStatus)', function(obj){
+                let contexts;
+                let hide;
+                let x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                let aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 0;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 1;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        let str = "&type=2&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+
+        });
+    });
+
+    /**
+     * 编辑
+     * @param info
+     */
+    function editPer(info){
+        $("#form")[0].reset();
+        $('#form-title').text('编辑期刊');
+        $('#title').val(info.title);
+        $('#intr').val(info.intr);
+        $('#sort').val(info.sort);
+        $('#url').val(info.url);
+        $('#faceBox img').attr('src', info.image);
+        //$("input[type='radio'][name='hidden'][value='" + info.hidden + "']").prop("checked", true);
+        $(":radio[name='hidden'][value='" + info.hidden + "']").attr('checked',true);
+        $(":radio[name='hidden'][value='" + info.hidden + "']").next().addClass('layui-form-radioed').children('i').addClass('layui-anim-scaleSpring');
+        //$('#prr').
+        $('.model-box').css('display', 'block');
+        $('#submitBtn').text('确认修改');
+        $('#type').val(2);
+        $('#catId').val(info.id);
+    }
+    /**
+     * 删除
+     */
+    function delPer(id){
+        let str = '&id=' + id;
+        layer.confirm('确定要删除?', {icon: 3, title:'提示'}, function(index){
+            //do something
+            layer.load();
+            $.ajax({
+                url:"{url 'site/entry/delCategory' array('m'=>$_GPC['m'],'op'=>'delCategory','version_id'=>$_GPC['version_id'])}",
+                type: 'get',
+                data: str,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getCatList();
+                            getCategoryTree();
+                        })
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+    }
+    function changeSort(id){
+        let sort = $('#changeSort'+id).val();
+        let str = "&type=2&id="+ id+"&sort="+sort;
+        $.ajax({
+            url:"{url 'site/entry/ChangeSort' array('m'=>$_GPC['m'],'op'=>'ChangeSort','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                res = $.parseJSON(res);
+                if(res.code == 200){
+                    layer.msg(res.errorMsg, {icon:1, time:1500});
+                } else {
+                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                }
+            },
+            error: function (data) {}
+        });
+    }
+    function getCatList(){
+        layui.use('table', function(){
+            var table = layui.table;
+            var util = layui.util;
+            table.render({
+                elem: '#demo'
+                ,height: 400
+                ,url: "{url 'site/entry/getCategoryList' array('m'=>$_GPC['m'],'op'=>'getPeriodicalList','version_id'=>$_GPC['version_id'])}" //数据接口
+                ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                    layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                    ,limit: 10
+                    ,limits:[10,20,50,100]
+                    ,first: false //不显示首页
+                    ,last: false //不显示尾页
+                }
+                ,autoSort: false
+                //,toolbar: true // 工具栏: 导出 打印等
+                ,cols: [[ //表头
+                    {field: 'id', title: 'ID', width:'5%', sort: true,  align: 'center',fixed: 'left'},
+                    {field: 'sort', title: '排序', width:'10%', sort:true, align: 'center'},
+                    {field: 'title', title: '标题', width:'30%', align: 'center'},
+                    {field: 'add_time', title: '创建时间', width:'20%', align: 'center', templet: function(d){
+                            return util.toDateString(d.add_time*1000, "yyyy-MM-dd HH:mm:ss");
+                        }},
+                    {field: 'hidden', title: '是否显示', width: '15%', align: 'center'},
+                    {field: 'operating', title: '编辑', width: '20%', align: 'center'}
+                ]]
+            });
+            table.on('sort(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                table.reload('demo', { //testTable是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     * 以树状形式填充select*/
+    function getCategoryTree(){
+        $.ajax({
+            url:"{url 'site/entry/getCategoryTree' array('m'=>$_GPC['m'],'op'=>'getCategoryTree','version_id'=>$_GPC['version_id'])}",
+            success: function (res) {
+                res = JSON.parse(res);
+                if (res.code == 200){
+                    $("#doc-select-1").empty();
+                    $("#doc-select-1").append("<option value=0>顶级分类</option>");
+                    traversing(res.list);
+                }
+            }
+        });
+    }
+    function traversing(res){
+        let x;
+        for ( x in res ){
+            $("#doc-select-1").append("<option value="+res[x].id+">"+res[x].title+"</option>");
+            if (res[x].child.length > 0){
+                traversing(res[x].child)
+            }
+        }
+    }
+</script>
+		<script>
+			layui.use(['jquery'], function() {
+				var $=layui.jquery;
+				//栏目展示隐藏
+				$('.showSubBtn').on('click', function() {
+					var _this = $(this);
+					var id = _this.attr('data-id');
+					var parent = _this.parents('.parent');
+					var child = $('.child-node-' + id);
+					var childAll = $('tr[parentid=' + id + ']');
+					if(parent.hasClass('collapsed')) {
+						_this.html('-');
+						parent.addClass('expanded').removeClass('collapsed');
+						child.css('display', '');
+					} else {
+						_this.html('+');
+						parent.addClass('collapsed').removeClass('expanded');
+						child.css('display', 'none');
+						childAll.addClass('collapsed').removeClass('expanded').css('display', 'none');
+						childAll.find('.showSubBtn').html('+');
+					}
+
+				})
+			});
+		</script>
+        <script>
+			layui.use(['form', 'jquery', 'layer', 'dialog'], function() {
+				var $ = layui.jquery;
+
+				//修改状态
+				$('#table-list').on('click', '.table-list-status', function() {
+					var That = $(this);
+					var status = That.attr('data-status');
+					var id = That.parent().attr('data-id');
+					if(status == 1) {
+						That.removeClass('layui-btn-normal').addClass('layui-btn-warm').html('隐藏').attr('data-status', 2);
+					} else if(status == 2) {
+						That.removeClass('layui-btn-warm').addClass('layui-btn-normal').html('显示').attr('data-status', 1);
+
+					}
+				})
+
+			});
+		</script>
+
+{template 'common/footer'}

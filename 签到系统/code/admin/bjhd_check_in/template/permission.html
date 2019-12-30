@@ -1,0 +1,101 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+
+<div class="hospital_list">
+    <div class="article_select_box">
+        <button class="layui-btn layui-btn-normal" id="btn-refresh">刷新</button>
+        <div>
+            <div class="demoTable">
+                <div class="layui-inline">
+                    <input type="text"  lay-verify="required" placeholder="请输入账号名" autocomplete="off" class="layui-input searchName" id="searchInput">
+                </div>
+            </div>
+            <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+        </div>
+    </div>
+    <div>
+        <table id="demo" lay-filter="demo"></table>
+    </div>
+</div>
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/html" id="is_show">
+    <input type="checkbox" name="is_show" data_id="{{d.id}}" lay-event="changeHide" lay-text="显示|隐藏" lay-skin="switch" lay-filter="hiddenTpl" {{d.is_show == '1' ? "checked": ""}}>
+</script>
+
+<!--操作列-->
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=EditPermission&m=vote_active&op=EditPermission&version_id=0&uid={{d.uid}}">权限操作</a>
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        getUserInfo()
+    });
+    function getUserInfo(){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                table.render({
+                    elem: '#demo'
+                    ,height: 400
+                    ,url: "{url 'site/entry/PlatformAccount' array('m'=>$_GPC['m'],'op'=>'PlatformAccount','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 8
+                        ,limits:[8]
+                        ,first: false //不显示首页
+                        ,last: false //不显示尾页
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'uid', title: 'ID', width:'20%', sort: true,  align: 'center'},
+                        {field: 'username', title: '账号名', width:'40%', sort: true,  align: 'center'},
+                        {templet: '#oper-col', title: '操作', width: '40%', align: 'center'}
+                    ]],
+                    done: function () {}
+                });
+            };
+            renderTable();
+            table.on('sort(demo)', function(obj){
+                table.reload('demo', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/PlatformAccount' array('m'=>$_GPC['m'],'op'=>'PlatformAccount','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+        });
+    }
+</script>
+{template 'common/footer'}

@@ -1,0 +1,371 @@
+<?php if (!defined('THINK_PATH')) exit(); /*a:1:{s:104:"/data/www/weixin.prykweb.com/weixintest/theLuckyRoller/public/../application/index/view/games/index.html";i:1549932655;}*/ ?>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	 <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>新春大转盘 普瑞眼科 </title>
+	<link rel="stylesheet" type="text/css" href="https://weixin.prykweb.com/weixintest/choujiangstatus/css/swiper.min-4.4.2.css"/>
+	<link rel="stylesheet" href="https://weixin.prykweb.com/weixintest/choujiangstatus/css/formValidation.min.css" />
+	<script type="text/javascript" src="https://weixin.prykweb.com/weixintest/choujiangstatus/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="https://weixin.prykweb.com/weixintest/choujiangstatus/js/formValidation.min.js"></script>	
+	
+	<link href="https://weixin.prykweb.com/weixintest/ncxcxstatus/css/style.css" rel="stylesheet">
+	<script>
+		(function (doc, win) {
+			var docEl = doc.documentElement,
+				resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+				recalc = function () {
+					var clientWidth = docEl.clientWidth;
+					if (!clientWidth) return;
+					if(clientWidth>=750){
+						docEl.style.fontSize = '100px';
+					}else{
+						docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+					}
+				};
+
+			if (!doc.addEventListener) return;
+	
+			win.addEventListener(resizeEvt, recalc, false);
+			doc.addEventListener('DOMContentLoaded', recalc, false);
+			recalc();
+		})(document, window);
+	</script>
+
+</head>
+<body>
+
+<div class="bg">
+	<?php if($data['code'] == 200): ?>
+	<input type="hidden" class="userId" value="<?php echo $data['userId']; ?>">
+	<input type="hidden" class="gameId" value="<?php echo $data['gameId']; ?>" >
+	<input type="hidden" class="nickname" value="<?php echo $data['nickname']; ?>">
+
+	<div class="bg1" id="lottery">	
+		<table border="0" cellpadding="0" cellspacing="0">
+		    <tr>
+		        <td class="lottery-unit lottery-unit-0 auto<?php echo $data['goodsList'][0]['id']; ?>" data-id="0" ><img src="<?php echo $data['goodsList'][0]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		        <td class="lottery-unit lottery-unit-1 auto<?php echo $data['goodsList'][1]['id']; ?>" data-id="1" ><img src="<?php echo $data['goodsList'][1]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		        <td class="lottery-unit lottery-unit-2 auto<?php echo $data['goodsList'][2]['id']; ?>" data-id="2" ><img src="<?php echo $data['goodsList'][2]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		    </tr>
+		    <tr>
+		        <td class="lottery-unit lottery-unit-7 auto<?php echo $data['goodsList'][7]['id']; ?>" data-id="7" ><img src="<?php echo $data['goodsList'][7]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		        <td style="background-color: #fedd55;" ><a href="#"></a></td>
+		        <td class="lottery-unit lottery-unit-3 auto<?php echo $data['goodsList'][3]['id']; ?>" data-id="3" ><img src="<?php echo $data['goodsList'][3]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		    </tr>
+		    <tr>
+		        <td class="lottery-unit lottery-unit-6 auto<?php echo $data['goodsList'][6]['id']; ?>" data-id="6" ><img src="<?php echo $data['goodsList'][6]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		        <td class="lottery-unit lottery-unit-5 auto<?php echo $data['goodsList'][5]['id']; ?>" data-id="5" ><img src="<?php echo $data['goodsList'][5]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		        <td class="lottery-unit lottery-unit-4 auto<?php echo $data['goodsList'][4]['id']; ?>" data-id="4" ><img src="<?php echo $data['goodsList'][4]['picurl']; ?>" alt="" width="100%" /><div class="mask"></div></td>
+		    </tr>
+		</table>
+	</div>
+	<?php else: ?>
+		<div class="error" style="text-align: center">
+			<?php echo $data['errmsg']; ?>
+		</div>
+	<?php endif; if($data['wining'] !=null): ?>
+		<div class="swiper-container">
+			<div class="swiper-wrapper">
+				<?php if(is_array($data['wining']) || $data['wining'] instanceof \think\Collection || $data['wining'] instanceof \think\Paginator): $key = 0; $__LIST__ = $data['wining'];if( count($__LIST__)==0 ) : echo "" ;else: foreach($__LIST__ as $key=>$vo): $mod = ($key % 2 );++$key;?>
+				<div class="swiper-slide" id="otherGoods">恭喜<b style="color: black" id="otherName"><?php echo $vo['nickname']; ?></b>抽中 <?php echo $vo['title']; ?></div>
+				<?php endforeach; endif; else: echo "" ;endif; ?>
+			</div>
+		</div>
+	<?php else: ?>
+		<div class="swiper-container"  style="display: none;">
+			<div class="swiper-wrapper"></div>
+		</div>
+	<?php endif; if($data['myGoodsList'] != null): ?>
+		<div class="mgift" >
+			<?php if(is_array($data['myGoodsList']) || $data['myGoodsList'] instanceof \think\Collection || $data['myGoodsList'] instanceof \think\Paginator): $key = 0; $__LIST__ = $data['myGoodsList'];if( count($__LIST__)==0 ) : echo "" ;else: foreach($__LIST__ as $key=>$vo): $mod = ($key % 2 );++$key;?>
+			<p class="mp1">您于:<?php echo $vo['time']; ?> 获取: <b style="color: black"><?php echo $vo['title']; ?></b></p>
+			<?php endforeach; endif; else: echo "" ;endif; ?>
+		</div>
+	<?php else: ?>
+		<div class="mgift" style="display: none;"></div>
+	<?php endif; ?>
+	<div class="rule">
+		<div class="rutxt">
+			<p class="mp2">活动规则：</p>
+			<?php if($data['gameId'] == 10): ?>
+			<p class="mp3">1. 活动时间：2019年2月7日12：00-2月9日12：00</p>
+			<?php else: ?>
+			<p class="mp3">1. 活动时间：<?php echo $data['gamecreatetime']; ?>至<?php echo $data['gameexpirestime']; ?></p>
+			<?php endif; ?>
+			<p class="mp3">2. 活动期间每人只可参加1次抽奖，100%中奖；<?php echo $data['contact']; ?></p>
+			<p class="mp3">3. 本活动最终解释权归普瑞眼科医院所有</p>
+			<?php if($data['gameId'] == 9): ?>
+			<p class="mp3">4.礼品领取及使用时间截止至2019年2月28日。</p>
+			<?php endif; ?>
+		</div>
+		<?php switch($data['gameId']): case "2": ?>
+			<div class="ruewm">
+				<img src="https://weixin.prykweb.com/attachment/images/purui/hos2.jpg" width="100%" height="100%" >
+			</div>
+		<?php break; case "3": ?>
+			<div class="ruewm">
+				<img src="https://weixin.prykweb.com/attachment/images/purui/hos<?php echo $data['randomNum']; ?>.jpg" width="100%" height="100%" >
+			</div>
+		<?php break; case "5": ?>
+			<div class="ruewm">
+				<img src="https://weixin.prykweb.com/attachment/images/purui/hos5.jpg" width="100%" height="100%" >
+			</div>
+		<?php break; case "7": ?>
+			<div class="ruewm">
+				<img src="https://weixin.prykweb.com/attachment/images/purui/hos7.jpg" width="100%" height="100%" >
+			</div>
+		<?php break; case "9": ?>
+			<div class="ruewm">
+				<img src="https://weixin.prykweb.com/attachment/images/purui/hos9.jpg" width="100%" height="100%" >
+			</div>
+		<?php break; case "10": ?>
+			<div class="ruewm">
+				<img src="https://weixin.prykweb.com/attachment/images/purui/hos10.jpg" width="100%" height="100%" >
+			</div>
+		<?php break; endswitch; ?>
+
+
+	</div>
+
+
+
+<div class="ordermask">
+	<div class="online-order" >
+		<div class="zt-wrapper">
+			<input type="hidden" value="" id="afterCommitGid">
+			<input type="hidden" value="" id="afterCommitGoodsName">
+			<form action="">
+				<ul>
+					<li>
+						<label >姓名：</label>
+						<input id="user" name="user" type="text" value="">
+					</li>
+					<li>
+						<label >手机：</label>
+						<input id="tel" type="text" value="">
+					</li>
+				</ul>
+				<div id="msgdemo" style="display: block;">
+					<span class="Validform_checktip"></span>
+				</div>
+				<div class="action">
+					<input type="button" id="buttonInfo" value="填信息拿奖品" onclick="commit()">
+				</div>
+			<div class="yc"><img src="https://weixin.prykweb.com/weixintest/ncxcxstatus/images/yc.png" width="100%" alt=""></div>
+			</form>
+
+		</div>
+
+	</div>
+</div>
+<div class="alertbox">
+	<div class="alert-cont" style="height: auto">
+		<div class="closeab"><img src="https://weixin.prykweb.com/weixintest/ncxcxstatus/images/yc.png" width="100%" alt=""></div>
+		<p class="alerttxt" style="text-align: center;padding-bottom: 0">恭喜你中奖了! <br> 奖品为：<span class="online-goods"></span></p>
+		<p class="alerttxt" style="text-align: center;padding-top: 0;padding-bottom: 40px;"><?php echo $data['contact']; ?></p>
+	</div>
+</div>
+</div>
+<!--<script type="text/javascript" src="https://weixin.prykweb.com/weixintest/choujiangstatus/js/easydialog.min.js"></script>
+<script type="text/javascript" src="https://weixin.prykweb.com/weixintest/choujiangstatus/js/Validform_v5.3.2.js"></script>
+<script src="https://weixin.prykweb.com/weixintest/ncxcxstatus/js/forpost.js"></script>-->
+<script src="https://weixin.prykweb.com/weixintest/choujiangstatus/js/swiper.min-4.4.2.js"></script>
+<script type="text/javascript">
+   var swipertxt = new Swiper('.swiper-container', {
+      direction: 'vertical',
+      autoplay: {
+        delay: 2000,
+        disableOnInteraction: true,
+      },
+      loop: true,
+	  vis:1,
+    });
+
+   $(".yc").click(function(){
+       $(".ordermask").hide();
+   });
+   $(".closeab").click(function(){
+       $(".alertbox").hide();
+   });
+
+   function showForm() {
+       $(".ordermask").show();
+   }
+   function showAlert() {
+       $(".alertbox").show();
+   }
+	
+</script>
+<script type="text/javascript">
+
+	var a= 0;
+    var lottery={
+        index:-1,    //当前转动到哪个位置，起点位置
+        count:8,    //总共有多少个位置
+        timer:0,    //setTimeout的ID，用clearTimeout清除
+        speed:20,    //初始转动速度
+        times:0,    //转动次数
+        cycle:50,    //转动基本次数：即至少需要转动多少次再进入抽奖环节
+        prize:2,    //中奖位置
+        init:function(id){
+            if ($("#"+id).find(".lottery-unit").length>0) {
+                $lottery = $("#"+id);
+                $units = $lottery.find(".lottery-unit");
+                this.obj = $lottery;
+                this.count = $units.length;
+                $lottery.find(".lottery-unit-"+this.index).addClass("active");
+            };
+        },
+        roll:function(){
+            var index = this.index;
+            var count = this.count;
+            var lottery = this.obj;
+            $(lottery).find(".lottery-unit-"+index).removeClass("active");
+            index += 1;
+            if (index>count-1) {
+                index = 0;
+            };
+            $(lottery).find(".lottery-unit-"+index).addClass("active");
+            this.index=index;
+            return false;
+        },
+        stop:function(index){
+            this.prize=index;
+            return false;
+        }
+    };
+
+    function roll(){
+        lottery.times += 1;
+        lottery.roll();//转动过程调用的是lottery的roll方法，这里是第一次调用初始化
+        if (lottery.times > lottery.cycle+10 && lottery.prize==lottery.index) {
+            clearTimeout(lottery.timer);
+            setTimeout(function () {
+                $(".ordermask").css("display","block");
+            } , 1000);
+            lottery.prize=-1;
+            lottery.times=0;
+            click=false;
+        }else{
+            if (lottery.times<lottery.cycle) {
+                lottery.speed -= 10;
+            }else if(lottery.times==lottery.cycle) {
+                lottery.prize = a;
+            }else{
+                if (lottery.times > lottery.cycle+10 && ((lottery.prize==0 && lottery.index==7) || lottery.prize==lottery.index+1)) {
+                    lottery.speed += 110;
+                }else{
+                    lottery.speed += 20;
+                }
+            }
+            if (lottery.speed<40) {
+                lottery.speed=40;
+            }
+            lottery.timer = setTimeout(roll,lottery.speed);//循环调用
+        }
+        return false;
+    }
+
+    var click=false;
+
+    window.onload=function(){
+        lottery.init('lottery');
+        $("#lottery a").click(function(){
+            if (click) { //click控制一次抽奖过程中不能重复点击抽奖按钮，后面的点击不响应
+                return false;
+            }else{
+                var userId = $(".userId").val();
+                var gameId = $(".gameId").val();
+                var contact = $(".contact").val();
+                $.post("https://weixin.prykweb.com/weixintest/theLuckyRoller/public/getRes", {"userId":userId, "gameId":gameId},
+                    function (result) {
+                        var res = JSON.parse(result);
+                        var nickname = $(".nickname").val();
+                        if(res.code === 200){
+                            $("#nums").html(res.times);
+                            if(res.goodsName != null){
+                                //alert("恭喜您获得"+ res.goodsName +  contact )
+								var stopNum  = $(".auto"+ res.goodsid).attr("data-id");
+								/*a = stopNum
+                                lottery.speed=100;
+                                roll();    //转圈过程不响应click事件，会将click置为false
+                                click=true; //一次抽奖完成后，设置click为true，可继续抽奖*/
+                                /*$(".alertbox").css("display","block");
+                                $(".online-goods").html($("#afterCommitGoodsName").val());*/
+                            } else {
+                                //alert("谢谢参与")
+                            }
+                        } else if(res.code === 3006){ // 未填写信息
+                            var stopNum  = $(".auto"+ res.goodsid).attr("data-id");
+                            a = stopNum;
+                            lottery.speed=100;
+                            roll();    //转圈过程不响应click事件，会将click置为false
+                            click=true; //一次抽奖完成后，设置click为true，可继续抽奖
+                            //$(".ordermask").css("display","block");
+                            $("#afterCommitGid").val(res.goodsid);
+                            $("#afterCommitGoodsName").val(res.goodsName);
+                            /*lottery.speed=100;
+                            roll();    //转圈过程不响应click事件，会将click置为false
+                            click=true; //一次抽奖完成后，设置click为true，可继续抽奖
+                            return false;*/
+
+                        } else {
+                            alert(res.errmsg)
+                        }
+                    });
+
+            }
+        });
+    };
+
+
+    function commit(){
+        $.ajax({
+            type : "post",
+            dataType : "json",
+            url : "https://weixin.prykweb.com/weixintest/theLuckyRoller/public/commitInfo",
+            data : {
+                tel : $("#tel").val(),
+                realname : $("#user").val(),
+                //shot :  $("input[name='shot']:checked").val(),
+                id : $(".userId").val(),
+                goodsId : $("#afterCommitGid").val(),
+                gameId : $(".gameId").val()
+
+            },
+            success : function(result){
+                var res = JSON.parse(result);
+                console.log(res);
+                if(res.code == 200){
+                    var myDate = new Date();
+                    var year=myDate.getFullYear();
+                    var month=myDate.getMonth()+1;
+                    var date=myDate.getDate();
+                    console.log($("#afterCommitGoodsName").val());
+                    $(".ordermask").css("display","none");
+                    $(".alertbox").css("display","block");
+                    $(".online-goods").html($("#afterCommitGoodsName").val());
+                    $(".mgift").css("display","block");
+                    $(".mgift").append("<p class='mp1' id=\"myGoodsTime\">"+"您于:"+year+"-"+month+"-"+date+" 获取:" +" <span style=\"color: black\" id=\"myGoodName\">"+$("#afterCommitGoodsName").val()+"</span></p>");
+                    /*$("#myGoodsTime").html("您于:"+year+"-"+month+"-"+date+" 获取:");
+                    $("#myGoodName").html($("#afterCommitGoodsName").val());*/
+                    $(".swiper-container").css("display", "block");
+                    $(".swiper-wrapper").append("<div class=\"swiper-slide\" > 恭喜<b style=\"color: black\" > "+ $(".nickname").val() +" </b> "+"抽中" + $("#afterCommitGoodsName").val()+" </div>");
+                   /* $("#otherGoods").html("抽中" + $("#afterCommitGoodsName").val());
+                    $("#otherName").html($(".nickname").val());*/
+                } else {
+                    alert(res.errormsg);
+                }
+            }
+
+        })
+    }
+
+
+</script>
+</body>
+</html>

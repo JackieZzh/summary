@@ -1,0 +1,564 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    #synopsis{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: slategray;
+        margin-right: 20px;
+    }
+    .preview_btn{
+        position: fixed;
+        top: 20%;
+        right: 0;
+        background-color: #ddd;
+        color: #1296DB;
+        width: 70px;
+        height: 40px;
+        line-height: 40px;
+        border-radius: 5px 0 0 5px;
+        z-index: 999999;
+    }
+    .preview_btn:hover{
+        cursor: pointer;
+    }
+</style>
+
+<input type="hidden" id="static" value="{$static}">
+<div class="top" >
+    {if $type == 1 }
+    <span>添加新活动</span>
+    {else}
+    <span style="font-size: 20px;margin-bottom: 50px">活动名: {$data['title']}</span>
+    <p>创建者: {$data['add_operator']}</p>
+    <p>创建时间: {$data['add_time']}</p>
+    {/if}
+</div>
+
+<div class="layui-tab">
+    <ul class="layui-tab-title">
+        <li id="a_this">活动详情</li>
+        <li id="p_this">参与者管理</li>
+    </ul>
+    <div class="layui-tab-content">
+        <!--<div class="preview_btn">预览</div>-->
+        <div class="layui-tab-item" id="editActive">
+            <form class="layui-form" id="form" enctype="multipart/form-data">
+                <input type="hidden" name="type" id="type" value="{$type}">
+                <input type="hidden" name="hid" id="hid" value="{$hid}">
+                <input type="hidden" name="id" id="id" value="{$data['id']}">
+                <input type="hidden"  id="begin" value="{$data['begin']}">
+                <input type="hidden"  id="end" value="{$data['end']}">
+                <input type="hidden"  id="b_color" value="{$data['background_color']}">
+                <input type="hidden"  id="b_color_rote" value="{$data['background_color_rote']}">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">活动名</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" lay-verify="required" autocomplete="off"  class="layui-input" value="{$data['title']}" maxlength="">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">活动描述</label>
+                    <div class="layui-input-block synopsis">
+                        <textarea placeholder="请输入内容" lay-verify="required" name="description" class="layui-textarea" maxlength="255" id="synopsisText">{$data['description']}</textarea>
+                        <span id="synopsis" ></span>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">活动背景图</label>
+                    <div class="layui-input-block">
+                        {php echo tpl_form_field_image('background_img',$data['background_img']);}
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">活动计时器图</label>
+                    <div class="layui-input-block">
+                        {php echo tpl_form_field_image('timer_img',$data['timer_img']);}
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">背景色</label>
+                        <div class="layui-input-inline" style="width: 120px;">
+                            <input type="text" value="{$data['background_color']}" name="background_color" placeholder="请选择颜色" class="layui-input" id="background_color">
+                        </div>
+                        <div class="layui-inline" style="left: -5px;">
+                            <div id="color"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">奖品链接</label>
+                    <div class="layui-input-block">
+                        {php echo tpl_form_field_image('goods_url',$data['goods_url']);}
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">规则链接</label>
+                    <div class="layui-input-block">
+                        {php echo tpl_form_field_image('rote_url',$data['rote_url']);}
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">规则背景色</label>
+                        <div class="layui-input-inline" style="width: 120px;">
+                            <input type="text" value="{$data['background_color_rote']}" name="background_color_rote" placeholder="请选择颜色" class="layui-input" id="background_color_rote">
+                        </div>
+                        <div class="layui-inline" style="left: -5px;">
+                            <div id="rote_color"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">开始时间</label>
+                    <div class="layui-input-block" style="width: 200px">
+                        <input name="begin" type="text" class="layui-input" id="active_begin" >
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">结束时间</label>
+                    <div class="layui-input-block" style="width: 200px">
+                        <input name="end" type="text" class="layui-input" id="active_end" >
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-inline ">
+                        <label class="layui-form-label">每天可投票次数</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="voter_can" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['voter_can']}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-inline ">
+                        <label class="layui-form-label">排名显示人数</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="leader_board_num" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['leader_board_num']}">
+                            <b style="color: red;">为"0" 则显示全部排名</b>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-inline ">
+                    <label class="layui-form-label">排序</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="sort" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['sort']}">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">显隐</label>
+                    <div class="layui-input-block">
+                        {if $data['is_show'] == 1}
+                        <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏"  checked>
+                        {else}
+                        <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏" >
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <a class="layui-btn layui-btn-normal" id="submitBtn" lay-submit lay-filter="submitBtn"></a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+        <div class="layui-tab-item" id="editParticipant">
+            <div class="article_select_box">
+                <button class="layui-btn layui-btn-normal" id="btn-refresh">刷新</button>
+                <div>
+                    <div class="demoTable">
+                        <div class="layui-inline">
+                            <input type="text" name="title"   lay-verify="required" placeholder="请输入参与者姓名" autocomplete="off" class="layui-input searchName" id="searchInput">
+                        </div>
+                    </div>
+                    <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+                </div>
+                <a class="layui-btn layui-btn-normal" id="allStatistics" style="margin-left: 20px;" onclick="addPart()">添加参与者</a>
+            </div>
+            <div>
+                <table id="participant" lay-filter="participant"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+<script type="text/html" id="partSex">
+    {{# if(d.gender == 1){ }}
+    男<img src="https://weixin.prykweb.com/addons/applet_cs/res/comment/icon/man.png" width='16px' height='16px'>
+    {{# } else if (d.gender == 2){  }}
+    女<img src="https://weixin.prykweb.com/addons/applet_cs/res/comment/icon/woman.png" width='16px' height='16px'>
+    {{# } else { }}
+        未知
+    {{# } }}
+</script>
+
+<script type="text/html" id="avatar">
+    <img src="https://weixin.prykweb.com/attachment/{{d.avatar_url}}" width="40px" height="40px">
+</script>
+
+<script type="text/html" id="isShow">
+    <input type="checkbox" name="is_show" data_id="{{d.id}}" lay-event="changeHide" lay-text="显示|隐藏" lay-skin="switch" lay-filter="hiddenTpl" {{d.is_show == '1' ? "checked": ""}}>
+</script>
+
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=AddParticipant&m=vote_active&op=AddParticipant&version_id=0&type=2&id={{d.id}}">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" onclick="delInfo(2, {{d.id}})" title="删除"><i class="layui-icon">&#xe640;</i></a>
+</script>
+
+<script type="text/html" id="sortBox">
+    <input id="changeSort{{d.id}}" type="text" value="{{d.sort}}" style="width: 100%; height:80%;text-align: center" onblur="changeSort({{d.id}}, 2)">
+</script>
+
+<script type="text/html" id="votes">
+    <a title="点击查看详情" href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=ActiveResInfo2&m=vote_active&op=ActiveResInfo2&version_id=0&pid={{d.id}}&aid={{d.active_id}}">{{d.votes}}</a>
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        var type = $('#type').val(),
+            begin = $('#begin').val(),
+            end = $('#end').val(),
+            aid = $('#id').val(),
+            static = $('#static').val();
+
+        if(static == 1){
+            $('#a_this').addClass('layui-this');
+            $('#editActive').addClass('layui-show')
+        } else {
+            $('#p_this').addClass('layui-this');
+            $('#editParticipant').addClass('layui-show')
+        }
+
+        if (type == 1){
+            $('#submitBtn').text('确认添加');
+        } else {
+            $('#submitBtn').text('确认修改');
+        }
+
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate,
+                element = layui.element;
+            laydate.render({
+                elem: '#active_begin',
+                value: begin,
+                min: 0,
+                type: 'datetime'
+            });
+            laydate.render({
+                elem: '#active_end',
+                value: end,
+                min: 0,
+                type: 'datetime'
+            });
+
+        });
+
+        layui.use('element', function(){
+            var element = layui.element;
+        });
+
+        layui.use('colorpicker', function(){
+            var colorpicker = layui.colorpicker,
+                color = $('#b_color').val(),
+                color_rote = $('#b_color_rote').val();
+            if (color != null || color != ''){
+                var c_str = color
+            }
+
+            if (color_rote != null || color_rote != ''){
+                var c_str_rote = color_rote
+            }
+            //常规使用
+            colorpicker.render({
+                elem: '#color' //绑定元素
+                ,size: 'lg'
+                ,color: c_str
+                ,change: function(color){ //颜色改变的回调
+                    layer.tips('选择了：'+ color, this.elem, {
+                        tips: 1
+                    });
+                }
+                ,done: function (color) {
+                    $('#background_color').val(color);
+                }
+            });
+
+            colorpicker.render({
+                elem: '#rote_color' //绑定元素
+                ,size: 'lg'
+                ,color: c_str_rote
+                ,change: function(color){ //颜色改变的回调
+                    layer.tips('选择了：'+ color, this.elem, {
+                        tips: 1
+                    });
+                }
+                ,done: function (color) {
+                    $('#background_color_rote').val(color);
+                }
+            });
+        });
+
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('submit(submitBtn)', function(){
+                // 添加 or 修改
+                var formData = new FormData($("#form")[0]); //此处id为form表单的id
+                $.ajax({
+                    url:"{url 'site/entry/addOrUpdateActive' array('m'=>$_GPC['m'],'op'=>'addOrUpdateActive','version_id'=>$_GPC['version_id'])}",
+                    type: 'post',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        res = $.parseJSON(res);
+                        layer.closeAll('loading');
+                        if(res.code == 200){
+                            layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                history.back(-1)
+                            });
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    },
+                    error: function (data) {}
+                });
+                return false;
+            });
+
+            // 监听switch
+            form.on('switch(hiddenTpl)', function(obj){
+                var contexts;
+                var hide;
+                var x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                var aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 1;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 2;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        var str = "&type=2&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+        });
+
+        getParticipantInfo(aid);
+
+    });
+
+    function getParticipantInfo(aid){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                layer.load(2);
+                table.render({
+                    elem: '#participant'
+                    ,height: 400
+                    ,url: "{url 'site/entry/GetParticipantInfo' array('m'=>$_GPC['m'],'op'=>'GetParticipantInfo','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 8
+                        ,limits:[8]
+                        ,first: true //不显示首页
+                        ,last: true //不显示尾页
+                    }
+                    ,where: {
+                        aid: aid
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center'},
+                        {field: 'sort', title: '排序', width:'10%', sort: true,  align: 'center', templet:'#sortBox'},
+                        {field: 'name', title: '参与者', width:'15%',  align: 'left'},
+                        {field: 'avatar_url', title: '头像', width:'15%', align: 'center', templet:"#avatar"},
+                        {field: 'gender', title: '性别', width:'10%', align: 'center', templet:"#partSex"},
+                        {field: 'is_show', title: '显隐', width:'11%', align: 'center', templet:"#isShow"},
+                        {field: 'votes', title: '已获票数', width:'14%', sort: true, align: 'center', templet:"#votes"},
+                        {templet: '#oper-col', title: '操作', width: '15%', align: 'center'}
+                    ]],
+                    done: function () {
+                        layer.closeAll('loading');
+                    }
+                });
+            };
+            renderTable();
+            table.on('sort(participant)', function(obj){
+                table.reload('participant', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput').val();
+                    table.reload('participant',{
+                        method:'post',
+                        url:"{url 'site/entry/GetParticipantInfo' array('m'=>$_GPC['m'],'op'=>'GetParticipantInfo','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+            // 参与者 详情
+            table.on("tool(participant)", function(obj){
+                var uid = obj.data.id;
+                window.location.href = "{url 'site/entry/addParticipant' array('m'=>$_GPC['m'],'op'=>'addParticipant','version_id'=>$_GPC['version_id'], 'type'=> 2 )}&uid="+ uid;
+            })
+        });
+
+    }
+
+    // 添加参与者
+    function addPart(){
+        var aid = $('#id').val(),
+        url = "https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=addParticipant&m=vote_active&op=addParticipant&version_id=0&type=1&aid="+aid;
+        if(aid != null && aid !=""){
+            window.location.href = url;
+        } else {
+            layer.msg("请先添加活动后 再试试...");
+        }
+    }
+
+    $("#synopsisText").bind("input propertychange focus",function(){
+        var a = $(this).val(),
+            l = a.length,
+            c = 255 - l;
+        if (c > 0){
+            $('#synopsis').html("您还可以输入 <b>"+ c + "</b> 个字");
+        } else{
+            $('#synopsis').html("<b style='color:red;'>已达到最大字数!!!</b>");
+        }
+    });
+    $("#synopsisText").bind("blur", function(){
+        $('#synopsis').html("");
+    });
+
+    function changeSort(id, type){
+        var sort = $('#changeSort'+id).val();
+        var str = "&type="+type+"&id="+ id+"&sort="+sort;
+        $.ajax({
+            url:"{url 'site/entry/ChangeSort' array('m'=>$_GPC['m'],'op'=>'ChangeSort','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            success: function (res) {
+                res = $.parseJSON(res);
+                if(res.code == 200){
+                    layer.msg(res.errorMsg, {icon:1, time:1500});
+                } else {
+                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                }
+            },
+            error: function (data) {}
+        });
+    }
+
+    function delInfo(type, id){
+        layer.open({
+            content: "确定删除该参与者?",
+            btn: ['确定', '取消'],
+            yes: function(index){
+                var str = "&type="+type+"&id="+ id;
+                layer.load();
+                $.ajax({
+                    url:"{url 'site/entry/DelInfo' array('m'=>$_GPC['m'],'op'=>'DelInfo','version_id'=>$_GPC['version_id'])}",
+                    data: str,
+                    success: function (res) {
+                        layer.closeAll('loading');
+                        res = $.parseJSON(res);
+                        if(res.code == 200){
+                            layer.msg(res.errorMsg+" <br> 您可以在回收站找回或彻底删除", {icon:1, time:2500});
+                            getParticipantInfo($('#id').val());
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:2500});
+                        }
+                    },
+                    error: function (data) {}
+                });
+                layer.close(index);
+            },
+            btn2: function (index, layero) {
+                layer.close(index);
+            }
+
+        });
+    }
+</script>
+
+{template 'common/footer'}

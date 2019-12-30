@@ -1,0 +1,112 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+
+<div class="article_select_box">
+    <button class="layui-btn" id="btn-refresh">刷新</button>
+    <div>
+        <div class="demoTable">
+            <div class="layui-inline">
+                <input type="text" name="title" required  lay-verify="required" placeholder="用户名或用户ID" autocomplete="off" class="layui-input searchName" id="searchInput">
+            </div>
+        </div>
+        <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+    </div>
+    <a class="layui-btn" id="allStatistics" style="margin-left: 20px;" href="{url 'site/entry/EditParticipant' array('m'=>$_GPC['m'],'op'=>'EditParticipant','version_id'=>$_GPC['version_id'], 'type' => 1)}">添加参与者</a>
+</div>
+
+<div>
+    <table id="demo" lay-filter="demo"></table>
+</div>
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+<script src="{MODULE_URL}res/assets/layui/common.js"></script>
+
+<script type="text/html" id="faceImg">
+    <img src="{{d.avatarUrl}}" width='40px' height='40px'>
+</script>
+
+<script type="text/html" id="genderBox">
+    {{d.gender == 1 ? "男" : "女"}}<img src="https://weixin.prykweb.com/addons/applet_cs/res/comment/icon/{{d.gender == 1 ? "man" : "woman"}}.png" width='16px' height='16px'>
+</script>
+
+<!--操作列-->
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">详情</a>
+</script>
+
+<script type="text/javascript">
+    layui.use('table', function(){
+        var table = layui.table;
+        var renderTable = function(){
+            layer.load(2);
+            table.render({
+                elem: '#demo'
+                ,height: 400
+                ,url: "{url 'site/entry/GetUserInfo' array('m'=>$_GPC['m'],'op'=>'GetUserInfo','version_id'=>$_GPC['version_id'])}" //数据接口
+                ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                    layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                    ,limit: 8
+                    ,limits:[8,10,20,50,100]
+                    ,first: false //不显示首页
+                    ,last: false //不显示尾页
+                }
+                ,autoSort: false
+                //,toolbar: true // 工具栏: 导出 打印等
+                ,cols: [[ //表头
+                    {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center',fixed: 'left'},
+                    {field: 'nickname', title: '用户昵称', width:'20%',  align: 'left'},
+                    {field: 'avatarUrl', title: '头像', width:'10%', align: 'center', templet:'#faceImg'},
+                    {field: 'openId', title: 'openId', width:'25%', align: 'left'},
+                    {field: 'gender', title: '性别', width: '10%', align: 'center', templet:"#genderBox"},
+                    {templet: '#oper-col', title: '统计', width: '15%', align: 'center'}
+                ]],
+                done: function () {
+                    layer.closeAll('loading');
+                }
+            });
+        };
+        renderTable();
+        table.on('sort(demo)', function(obj){
+            table.reload('demo', { //demo是表格容器id
+                initSort: obj
+                ,where: {
+                    field: obj.field //排序字段
+                    ,order: obj.type //排序方式
+                }
+            });
+        });
+        // 绑定reload事件
+        var $ = layui.$, active = {
+            reload:function () {
+                var condition = $('#searchInput').val();
+                table.reload('demo',{
+                    method:'post',
+                    url:"{url 'site/entry/GetUserInfo' array('m'=>$_GPC['m'],'op'=>'GetUserInfo','version_id'=>$_GPC['version_id'])}",
+                    where:{
+                        condition : condition
+                    },
+                    page:{
+                        curr:1
+                    }
+                });
+            }
+        };
+        // 点击搜索
+        $('.searchBtn').on('click', function(){
+            var type = $(this).attr('data-type');
+            active[type] ? active[type].call(this): '';
+        });
+        // 刷新表格
+        $('#btn-refresh').click(function () {
+            renderTable();
+            $('#searchInput').val('');
+        });
+        // 个人统计
+        table.on("tool(demo)", function(obj){
+            var uid = obj.data.id;
+            window.location.href = "{url 'site/entry/OneUserStatistics' array('m'=>$_GPC['m'],'op'=>'OneUserStatistics','version_id'=>$_GPC['version_id'])}&uid="+ uid;
+        })
+    });
+</script>
+{template 'common/footer'}

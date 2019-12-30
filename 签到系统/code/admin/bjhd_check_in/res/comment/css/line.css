@@ -1,0 +1,141 @@
+.app_detail_overview{
+    margin-bottom: 20px;
+}
+
+.mod_default_box{
+    margin-bottom: 30px;
+}
+
+.mod_default_hd{
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.mod_default_hd h4{
+    font-weight: 400;
+    font-size: 20px;
+    margin-bottom: 15px;
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.mod_default_hd .mod_hd_extra {
+    position: absolute;
+    top: 0;
+    right: 0;
+    line-height: 32px;
+}
+
+.mini_tips.icon_after i {
+    margin-left: 10px;
+}
+
+.data_overview_list_wrp{
+    overflow: hidden;
+    display: flex;
+    justify-content: space-around;
+}
+
+.app_detail_overview .data_overview_item:first-child {
+    border-left-width: 0;
+}
+.app_detail_overview .data_overview_item {
+    font-size: 14px;
+    width: 25%;
+    box-sizing: border-box;
+    min-width: 165px;
+    margin: 15px 0;
+    display: inline-block;
+    vertical-align: top;
+    border-left: 1px solid #e7e7eb;
+    text-align: center;
+}
+
+.data_overview_item:first-child .data_overview_title {
+    border-left-width: 0;
+}
+
+.data_overview_desc {
+    padding-top: 5px;
+    font-size: 24px;
+}
+
+.app_detail_overview .data_overview_percent {
+    display: inline-block;
+    vertical-align: top;
+}
+
+li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+
+.app_detail_overview .data_overview_percent_item_inner label {
+    color: #9a9a9a;
+    text-align: left;
+}
+
+
+.app_detail_overview{
+    margin-bottom: 50px;
+}
+.mod_default_box {
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(150,150,150,0.3);
+    padding: 20px 30px 30px;
+}
+.mod_default_hd {
+    position: relative;
+    margin-bottom: 30px;
+}
+.mod_default_hd h4 {
+    font-weight: 400;
+    font-size: 20px;
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 0;
+    padding: 0;
+}
+.chooseTimeBtn{
+    color: #aaa;
+    margin-left: 30px;
+}
+.chooseTimeBtn:hover{
+    cursor: pointer;
+}
+
+.chooseTimeBox{
+    display: none;
+}
+
+.map{
+    width: 900px;
+    height:370px;
+}
+
+.mapTip{
+    display: none;
+    color: #ccc;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 320px;
+}
+.layui-progress{
+    background-color: #fff;
+    margin-top: 10px;
+}
+.layui-table tbody tr:hover, .layui-table thead tr, .layui-table-click, .layui-table-header, .layui-table-hover, .layui-table-mend, .layui-table-patch, .layui-table-tool, .layui-table[lay-even] tr:nth-child(even) {
+    background-color: transparent;
+}
+
+.layui-progress-bar{
+    border-radius: 0;
+}
+
+.js_YO_delayData{
+
+}

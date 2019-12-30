@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>在线小游戏</title>
+    <style>
+        #mygoods{
+            float: left;
+            width: 100%;
+            border: 1px solid #000;
+        }
+        #userInfo{
+            background-color: #444;
+            width: 100%;
+            height:500px;
+            position: fixed;
+            top:0;
+            left:0;
+        }
+        #luckyRolley{
+            border: 1px solid #000;
+        }
+        .img{
+            width:50px;
+        }
+        .demo ul{
+            width:300px;/* height:30px;*/
+            height:90px;
+            padding:0 20px;
+            border:#e1e1e1 solid 1px;
+            overflow:hidden;
+        }
+        .demo li{
+            width:300px;
+            height:30px;
+            line-height:30px;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+        }
+    </style>
+</head>
+<body>
+    <input type="hidden" id="htmlStatus" value="0">
+    {if condition="$data.code == 200"}
+    <input type="hidden" class="userId" value="{$data.userId}">
+    <input type="hidden" class="gameId" value="{$data.gameId}" >
+    <input type="hidden" class="nickname" value="{$data.nickname}">
+
+    <div class="content" >
+        <div class="nickname">用户名:{$data.nickname}</div>
+        <div class="headimgurl">
+            <img src="{$data.headimgurl}">
+        </div>
+
+        <div class="num">
+            剩余次数: <p id="nums">{$data.times}</p>
+        </div>
+    </div>
+    <div id="luckyRolley">
+        <div class="button">
+            <span>这里是转盘</span>
+            <div class="goodsList">
+                {volist name="$data.goodsList" id="vo" key="key"}
+                <span data-id="{$vo.id}">{$vo.title}</span>
+                <img src="{$vo.picurl}" class="img">
+                {/volist}
+            </div>
+            <button onclick="getRes()">
+                click me!
+            </button>
+        </div>
+    </div>
+
+    {if condition="$data.myGoodsList != null"}
+    <div >
+        <ul id="mygoods">
+            {volist name="$data.myGoodsList" id="vo" key="key"}
+            <li>于:{$vo.time} 获取:<span style="color: red">{$vo.title}</span></li>
+            {/volist}
+        </ul>
+    </div>
+    {/if}
+    {else/}
+    <div class="error">
+        {$data.errmsg}
+    </div>
+    {/if}
+
+    <div id="userInfo" style="display: none">
+        <input type="hidden" value="" id="afterCommitGid">
+        <input type="hidden" value="" id="afterCommitGoodsName">
+        <input type="text" placeholder="请填写姓名" value="" id="name">
+        <input type="tel" placeholder="请填写电话号码" value="" id="tel">
+        <div>
+            您是否近视?
+            <label><input name="shot" type="radio" value="1" />近视 </label>
+            <label><input name="shot" type="radio" value="2" />非近视 </label>
+        </div>
+
+        <button onclick="commit()">提交</button>
+        <button onclick="reset()">取消</button>
+    </div>
+
+    <div class="demo">
+        <ul id="otherGoodsList">
+            {volist name="data.wining" id="vo" key="key"}
+                <li>恭喜{$vo.nickname} 获取 {$vo.title}</li>
+            {/volist}
+        </ul>
+    </div>
+
+    <div class="remind">
+        {if condition="$data.contact != null" }
+        <input type="hidden" class="contact" value="{$data.contact}">
+        <p>{$data.contact}</p>
+        {/if}
+    </div>
+    <div>
+        <span>活动时间{$data.gamecreatetime}-{$data.gameexpirestime}</span>
+    </div>
+
+</body>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" ></script>
+
+<script>
+    var lH = $('.demo li').height();
+    setInterval(function(){
+        $('.demo li').eq(0).animate({marginTop:-lH,opacity:0},'slow',function(){
+            $('.demo li').eq(0).css('margin-top','').appendTo('.demo ul').animate({opacity:1});
+        });
+    },3000);
+
+
+    $(function () {
+        var isPageHide = false;
+        window.addEventListener('pageshow', function () {
+            if (isPageHide) {
+                window.location.href("https://weixin.prykweb.com/weixintest/theLuckyRoller/public/beforeTheLuckyRoller/1");
+            }
+        });
+        window.addEventListener('pagehide', function () {
+            isPageHide = true;
+        });
+    });
+
+    /*function myFunction(){
+        //window.location.href("https://weixin.prykweb.com/weixintest/theLuckyRoller/public/beforeTheLuckyRoller/1");
+        window.location.replace("https://weixin.prykweb.com/weixintest/theLuckyRoller/public/beforeTheLuckyRoller/1");
+    }*/
+
+    function getRes(){
+        var userId = $(".userId").val();
+        var gameId = $(".gameId").val();
+        var contact = $(".contact").val();
+        $.post("https://weixin.prykweb.com/weixintest/theLuckyRoller/public/getRes", {"userId":userId, "gameId":gameId},
+            function (result) {
+                var res = JSON.parse(result);
+                var nickname = $(".nickname").val();
+                if(res.code === 200){
+                    $("#nums").html(res.times);
+                    if(res.goodsName != null){
+                        $("#mygoods").append("<li>于:"+ res.time +" 获取:<span style='color: red'>"+ res.goodsName +" </span></li>");
+                        $("#otherGoodsList").append("<li style='width:300px; height:30px; line-height:30px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;'>恭喜"+ nickname+"获取 "+ res.goodsName +"</span></li>");
+                        alert("恭喜您获得"+ res.goodsName +  contact )
+                    } else {
+                        alert("谢谢参与")
+                    }
+                } else if(res.code === 3006){
+                    $("#userInfo").css("display","block");
+                    console.log(res);
+                    $("#htmlStatus").val(1);
+                    $("#afterCommitGid").val(res.goodsid);
+                    $("#afterCommitGoodsName").val(res.goodsName);
+                } else {
+                    alert(res.errmsg)
+                }
+        });
+    }
+
+    function commit(){
+        $.ajax({
+            type : "post",
+            dataType : "json",
+            url : "https://weixin.prykweb.com/weixintest/theLuckyRoller/public/commitInfo",
+            data : {
+                tel : $("#tel").val(),
+                realname : $("#name").val(),
+                realcity : $("#realCity").val(),
+                shot :  $("input[name='shot']:checked").val(),
+                id : $(".userId").val(),
+                goodsId : $("#afterCommitGid").val(),
+                gameId : $(".gameId").val()
+
+            },
+            success : function(result){
+                var res = JSON.parse(result);
+                console.log(res);
+                if(res.code == 200){
+                    alert("提交成功!");
+                    $("#userInfo").css("display","none");
+                    $("#htmlStatus").val(0);
+                    $("#nums").html($("#nums").html() - 1);
+                } else {
+                    alert(res.errormsg);
+                }
+            }
+
+        })
+    }
+
+    function reset(){
+        $("#userInfo").css("display","none");
+        $("#htmlStatus").val(0);
+        $.ajax({
+            type : "post",
+            dataType : "json",
+            url : "https://weixin.prykweb.com/weixintest/theLuckyRoller/public/errorCommit",
+            data:{
+                goodsId : $("#afterCommitGid").val(),
+                gameId : $(".gameId").val(),
+                uId: $(".userId").val(),
+                status : 1
+            },
+            success : function (res){
+
+            }
+        })
+    }
+
+    // 监听关闭页面
+        /*window.onbeforeunload = onbeforeunload_handler;
+        function onbeforeunload_handler() {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                url: "https://weixin.prykweb.com/weixintest/theLuckyRoller/public/errorCommit",
+                data: {
+                    goodsId: $("#afterCommitGid").val(),
+                    gameId: $(".gameId").val(),
+                    uId: $(".userId").val(),
+                    status : $("#htmlStatus").val()
+                },
+                success: function (res) {
+                    //alert("是否退出!");
+                }
+            })
+        }*/
+
+</script>
+
+
+</html>

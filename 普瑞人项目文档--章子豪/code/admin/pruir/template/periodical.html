@@ -1,0 +1,296 @@
+{template 'common/header'}
+    <link rel="stylesheet" href="{MODULE_URL}res/layui/css/layui.css" />
+    <link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+    <style>.layui-table-view .layui-table td, .layui-table-view .layui-table th{ padding: 5px 13px !important;}</style>
+    <div>
+        <button class="layui-btn layui-btn-sm" id="addPeriodical">
+            <i class="layui-icon">&#xe654;</i> 添加期刊
+        </button>
+        <table id="demo" lay-filter="test"></table>
+    </div>
+    <div class="model-box" >
+        <div class="form-box">
+            
+            <div class="form-title_bg" style="width:49%;">
+                <span id="form-title"></span><strong id="close_YYY" style="cursor: pointer;" class="layui-icon layui-icon-close"></strong>
+            </div>
+            
+            
+            <form class="layui-form" id="form" enctype="multipart/form-data" style="margin:60px 20px 20px;">
+                <input type="hidden" name="type" value="" id="type">
+                <input type="hidden" name="porId" value="" id="porId">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">标题：</label>
+                    <div class="layui-input-block layui-width-45">
+                        <input type="text" name="title" id="title" autocomplete="off" class="layui-input" >
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">描述：</label>
+                    <div class="layui-input-block">
+                        <textarea  class="layui-textarea" name="intr" id="intr" ></textarea>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">排序：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="sort" id="sort"  autocomplete="off" class="layui-input" value="0">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">封面图：</label>
+                    <div class="layui-input-block layui-width-45" id="faceBox">
+                        {php echo tpl_form_field_image('face',$list['face']);}
+                    </div>
+                    <p style=" margin-left: 110px; margin-top:10px; color: #f00; font-size: 14px;">期刊封面图比例为（3：4），建议尺寸：260px * 340px </p>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否显示：</label>
+                    <div class="layui-input-block" id="prr">
+                        <input type="radio" name="hidden" value="0" title="显示" >
+                        <input type="radio" name="hidden" value="1" title="隐藏">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <a class="layui-btn " id="submitBtn"></a>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+<script src="{MODULE_URL}res/layui/layui.all.js"></script>
+<script type="text/javascript">
+    $(function(){
+        /*生成期刊列表*/
+        getPreList();
+        /*显示添加期刊模态框*/
+        $("#addPeriodical").on('click', function(){
+            $("#form")[0].reset();
+            //$('#faceBox img').attr('src', '');
+            $('#submitBtn').text('新建');
+            $('#type').val(1);
+            $('#form-title').text('新建期刊');
+            $('.model-box').css('display', 'block');
+            $('.input-group img').css('src', '');
+        });
+
+        /*点击蒙版关闭*/
+        $('#close_YYY').on('click', function(e){
+            $('.model-box').css('display', 'none');
+            e.stopPropagation();
+        });
+        /*阻止冒泡*/
+        $('.form-box').on('click', function(e){
+            e.stopPropagation();
+        });
+
+        /*新增/编辑提交*/
+        $("#submitBtn").on('click', function () {
+            layer.load();
+            var formData = new FormData($("#form")[0]); //此处id为form表单的id
+            $.ajax({
+                url:"{url 'site/entry/addOrUpdatePeriodical' array('m'=>$_GPC['m'],'op'=>'addOrUpdatePeriodical','version_id'=>$_GPC['version_id'])}",
+                type: 'post',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getPreList()
+                            $('.model-box').css('display', 'none');
+                        });
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                        layer.close(index);
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+
+        /*改变状态*/
+        layui.use('form', function () {
+            /**
+             * 监听状态
+             */
+            var form = layui.form;
+            form.on('switch(hideStatus)', function(obj){
+                var contexts;
+                var hide;
+                var x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                var aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 0;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 1;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        var str = "&type=3&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+
+        });
+
+    });
+    /**
+     * 编辑
+     * @param info
+     */
+    function editPer(info){
+        $("#form")[0].reset();
+        $('#form-title').text('编辑期刊');
+        $('#title').val(info.title);
+        $('#intr').val(info.intr);
+        $('#sort').val(info.sort);
+        $('#faceBox img').attr('src', info.image);
+        //$("input[type='radio'][name='hidden'][value='" + info.hidden + "']").prop("checked", true);
+        $(":radio[name='hidden'][value='" + info.hidden + "']").attr('checked',true);
+        $(":radio[name='hidden'][value='" + info.hidden + "']").next().addClass('layui-form-radioed').children('i').addClass('layui-anim-scaleSpring');
+        //$('#prr').
+        $('.model-box').css('display', 'block');
+        $('#submitBtn').text('确认修改');
+        $('#type').val(2);
+        $('#porId').val(info.id);
+    }
+    /**
+     * 删除
+     */
+    function delPer(id){
+        var str = '&id=' + id;
+        layer.confirm('确定要删除?', {icon: 3, title:'提示'}, function(index){
+            //do something
+            layer.load();
+            $.ajax({
+                url:"{url 'site/entry/delPeriodical' array('m'=>$_GPC['m'],'op'=>'delPeriodical','version_id'=>$_GPC['version_id'])}",
+                type: 'get',
+                data: str,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = $.parseJSON(res);
+                    layer.closeAll('loading');
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            getPreList();
+                        })
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+        });
+
+    }
+    function getPreList(){
+        layui.use('table', function(){
+            var table = layui.table;
+            table.render({
+                elem: '#demo'
+                ,height: 400
+                ,url: "{url 'site/entry/getPeriodicalList' array('m'=>$_GPC['m'],'op'=>'getPeriodicalList','version_id'=>$_GPC['version_id'])}" //数据接口
+                ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                    layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                    ,limit: 10
+                    ,limits:[10,20,50,100]
+                    ,first: false //不显示首页
+                    ,last: false //不显示尾页
+                }
+                ,autoSort: false
+                //,toolbar: true // 工具栏: 导出 打印等
+                ,cols: [[ //表头
+                    {field: 'id', title: 'ID', width:'5%', sort:true, align: 'center',fixed: 'left'},
+                    {field: 'sort', title: '排序', width:'10%', sort:true, align: 'center'},
+                    {field: 'image', title: '封面图', width: '20%', align: 'center'},
+                    {field: 'title', title: '标题', width:'20%', align: 'center'},
+                    {field: 'hidden', title: '是否显示', width: '15%', align: 'center'},
+                    {field: 'operating', title: '编辑', width: '15%', align: 'center'}
+                ]]
+            });
+            table.on('sort(test)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                table.reload('demo', { //testTable是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+        });
+    }
+    function changeSort(id){
+        console.log(id);
+        var sort = $('#changeSort'+id).val();
+        var str = "&type=1&id="+ id+"&sort="+sort;
+        $.ajax({
+            url:"{url 'site/entry/ChangeSort' array('m'=>$_GPC['m'],'op'=>'ChangeSort','version_id'=>$_GPC['version_id'])}",
+            type: 'get',
+            data: str,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                res = $.parseJSON(res);
+                if(res.code == 200){
+                    layer.msg(res.errorMsg, {icon:1, time:1500});
+                } else {
+                    layer.msg(res.errorMsg, {icon:5, time:1500});
+                }
+            },
+            error: function (data) {}
+        });
+    }
+</script>
+
+{template 'common/footer'}

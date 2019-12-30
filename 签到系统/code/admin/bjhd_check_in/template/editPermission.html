@@ -1,0 +1,59 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+
+<div class="hospital_list" style="width: 600px;">
+    <form class="layui-form" id="form" enctype="multipart/form-data">
+        <input type="hidden" name="uid" id="uid" value="{$uid}">
+        <div style="margin-bottom: 50px">
+            {loop $hosList $index $item}
+            {if $item['selected'] == 1}
+            <input type="checkbox" name="hid" value="{$item['id']}" title="{$item['title']}" lay-skin="primary" checked>
+            {else}
+            <input type="checkbox" name="hid" value="{$item['id']}" title="{$item['title']}" lay-skin="primary">
+            {/if}
+            {/loop}
+        </div>
+
+        <div><a class="layui-btn" id="submitBtn" lay-submit lay-filter="submitBtn">确认</a></div>
+    </form>
+</div>
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script>
+    layui.use('form', function(){
+        var form = layui.form;
+
+        //监听提交
+        form.on('submit(submitBtn)', function(){
+            var arr = new Array();
+            $("input:checkbox[name='hid']:checked").each(function(i){
+                arr[i] = $(this).val();
+            });
+            var hid = arr.join(","),
+                uid = $('#uid').val();
+            $.ajax({
+                url:"{url 'site/entry/DoEditPermission' array('m'=>$_GPC['m'],'op'=>'DoEditPermission','version_id'=>$_GPC['version_id'])}&hid="+hid+ "&uid="+ uid,
+                type: 'get',
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    res = JSON.parse(res);
+                    if(res.code == 200){
+                        layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                            history.back(-1)
+                        });
+                    } else {
+                        layer.msg(res.errorMsg, {icon:5, time:1500});
+                    }
+                },
+                error: function (data) {}
+            });
+            return false;
+        });
+    });
+</script>
+
+{template 'common/footer'}

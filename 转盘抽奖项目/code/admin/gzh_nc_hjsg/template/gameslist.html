@@ -1,0 +1,140 @@
+{template 'common/header'}
+<link rel="stylesheet" type="text/css" href="../addons/{php echo $_GPC['m']}/resource/css/style.css" />
+<link rel="stylesheet" type="text/css" href="../addons/{php echo $_GPC['m']}/resource/swal/dist/sweetalert2.min.css" />
+<ul class="nav nav-tabs">
+	<li class="active"><a href="{php echo $this->createWebUrl('goods', array('op'=>'display'));}">奖品列表</a></li>
+	<!-- <li><a href="{php echo $this->createWebUrl('goods', array('op'=>'edit'));}">添加奖品</a></li> -->
+</ul>
+
+<div class="main">
+	<div class="panel panel-info">
+	<div class="panel-heading">筛选</div>
+	<div class="panel-body">
+	<form  method="post" class="we7-form" role="form" action="{url 'site/entry/gameslist',array('m'=>'gzh_nc_hjsg')}">
+
+				<div class="form-group">
+					<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">关键字</label>
+					<div class="col-xs-12 col-sm-8 col-md-8 col-lg-6">
+						<input class="form-control" name="keywords" id="" type="text" value="{$_GPC['keywords']}" placeholder="奖品名称或者城市">
+					</div>
+					<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+				</div>
+		<!---->
+				<!--<div class="form-group">-->
+				<!---->
+					<!--<div class="col-xs-12 col-sm-2 col-md-1 col-lg-1">-->
+						<!--<button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>-->
+					<!--</div>-->
+				<!--</div>-->
+			</form>
+		<a href="{url 'site/entry/addGamesList',array('m'=>'gzh_nc_hjsg')}">添加活动+</a>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">游戏列表</div>
+		<div class="panel-body">
+			<div class="table-responsive panel-body">
+				<table class="table table-hover" style="min-width: 300px;">
+					<thead class="navbar-inner">
+						<tr>
+							<th class="col-sm-1 text-center">ID</th>
+							<th class="col-sm-2 text-center">游戏名称</th>
+							<th class="col-sm-1 text-center">游戏可玩次数</th>
+						    <th class="col-sm-1 text-center">游戏状态</th>
+							<th class="col-sm-1 text-center">城市</th>
+							<!--<th class="col-sm-1 text-center">联系</th>-->
+							<th class="col-sm-1 text-center">创建时间</th>
+							<th class="col-sm-1 text-center">有效时间</th>
+							<th class="col-sm-3 text-center">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						 {loop $list $index $item}
+						<tr>
+							  <td style="text-align: center;">{$item['id']}</td>
+                <td style="text-align: center;">{$item['title']}</td>
+                <td style="text-align: center;">{$item['usertimes']}</td>
+             
+                <td style="text-align: center;">{php echo $this->getGamesStatus($item['status']);}</td>
+                <td style="text-align: center;">{$item['whichunit']}</td>
+                <!--<td style="text-align: center;">{$item['contact']}</td>-->
+                <td style="width: 10%; text-align: center;">{php echo date('Y-m-d',$item['createtime'])}</td>
+                <td style="width: 10%; text-align: center;">{php echo date('Y-m-d',$item['expirestime'])}</td>
+
+				
+				<td class="text-center">
+					<a href="javaScript:;" class="fa fa-pencil"  onclick="copyLink({$item['id']})">复制活动链接</a>
+					{if $item['id'] == 15}
+					<input style='border: none;width: 1px;height:1px;outline: none;opacity: 0;' type='text' id="copy{$item['id']}" value="https://weixin.prykweb.com/weixintest/ncluckyRoller/public/wxTest/15">
+					{else}
+					<input style='border: none;width: 1px;height:1px;outline: none;opacity: 0;' type='text' id="copy{$item['id']}" value="https://weixin.prykweb.com/weixintest/theLuckyRoller/public/wxTest/{$item['id']}">
+					{/if}
+					<a href="{url 'site/entry/getGameGoods',array('m'=>'gzh_nc_hjsg','op'=>'getGameGoods','id'=>$item['id'],'game_id'=>$item['id'])}" class="fa fa-pencil">奖品列表</a>
+					<a href="{url 'site/entry/gameslistedit',array('m'=>'gzh_nc_hjsg','op'=>'gameslistedit','id'=>$item['id'],'version_id'=>$_GPC['version_id'])}" class="fa fa-pencil">编辑</a>
+					  <a class="btn btn-danger btn-xs delete"  data-toggle="tooltip" data-placement="top" title=""  data-id="{$item['id']}"  data-original-title="删除">删除</a>
+				</td>
+						</tr>
+						{/loop}
+						 {if empty($list)}
+						<tr>
+							<td colspan="8">
+								暂无奖品
+							</td>
+						</tr>
+						{/if}
+					</tbody>
+				</table>
+				{$pager}
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{template 'common/footer'}
+<script>
+    require(["../addons/{php echo $_GPC['m']}/resource/swal/dist/sweetalert2.min.js"],function(){
+        $(function(){
+            //删除
+            $(".delete").click(function(){
+                var that=$(this);
+                var id=$(this).attr('data-id');
+                console.log(id);
+                swal({
+                    title: '确定删除吗?',
+                    text: "确定删除吗?",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: '删除',
+                    cancelButtonText: '取消',
+                }).then(function(isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            type:"post",
+                            url:"{url 'site/entry/gameslistdel',array('m'=>$_GPC['m'],'op'=>'gameslistdel','version_id'=>$_GPC['version_id'])}",
+                            data:{id:id},
+                            dataType:'json',
+                            success:function(res){
+                                if(res.status==1){
+                                    swal('操作成功!', '操作成功!', 'success');
+                                    that.parents('tr').remove();
+                                }else{
+                                    swal('操作失败!', '操作失败!', 'error');
+                                }
+                            }
+                        })
+                    }
+                })
+            });
+        })
+    });
+
+    function copyLink(id){
+        var Url= document.getElementById("copy"+id);
+        Url.select(); // 选择对象
+        document.execCommand("Copy"); // 执行浏览器复制命令
+        alert("复制成功! 请粘贴至微信浏览器内浏览!");
+    }
+    </script>

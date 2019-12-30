@@ -1,0 +1,165 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+
+<div class="hospital_list">
+    <div class="article_select_box">
+        <button class="layui-btn  layui-btn-normal" id="btn-refresh">刷新</button>
+        <div>
+            <div class="demoTable">
+                <div class="layui-inline">
+                    <input type="text" name="title"   lay-verify="required" placeholder="请输入医院名" autocomplete="off" class="layui-input searchName" id="searchInput">
+                </div>
+            </div>
+            <button class="layui-btn layui-btn-normal layui-btn-sm searchBtn article_select_button"  data-type="reload">搜索</button>
+        </div>
+        <a class="layui-btn  layui-btn-normal" id="allStatistics" style="margin-left: 20px;" onclick="addHospital()">添加医院</a>
+    </div>
+    <div>
+        <table id="demo" lay-filter="demo"></table>
+    </div>
+</div>
+
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/html" id="is_show">
+    <input type="checkbox" name="is_show" data_id="{{d.id}}" lay-event="changeHide" lay-text="显示|隐藏" lay-skin="switch" lay-filter="hiddenTpl" {{d.is_show == '1' ? "checked": ""}}>
+</script>
+
+<!--操作列-->
+<script type="text/html" id="oper-col">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=EditOrUpdateHospital&m=vote_active&op=EditOrUpdateHospital&version_id=0&type=2&id={{d.id}}">编辑</a>
+</script>
+
+<script type="text/javascript">
+    $(function(){
+        layui.use('form', function(){
+            var form = layui.form;
+            // 监听switch
+            form.on('switch(hiddenTpl)', function(obj){
+                var contexts;
+                var hide;
+                var x = obj.elem.checked;//判断开关状态
+                obj.elem.checked = !x;
+                form.render();
+                var aid = obj.elem.attributes.data_id.value;
+                if (x==true) {
+                    hide = 1;
+                    contexts = "你确定要显示么";
+                } else {
+                    hide = 2;
+                    contexts = "你确定要隐藏么";
+                }
+                layer.open({
+                    content: contexts
+                    , btn: ['确定', '取消']
+                    , yes: function (index, layero) {
+                        layer.load();
+                        var str = "&type=3&id="+aid+"&hide="+hide;
+                        $.ajax({
+                            url:"{url 'site/entry/changeHide' array('m'=>$_GPC['m'],'op'=>'changeHide','version_id'=>$_GPC['version_id'])}",
+                            type: 'get',
+                            data: str,
+                            success: function (res) {
+                                res = $.parseJSON(res);
+                                layer.closeAll('loading');
+                                if(res.code == 200){
+                                    layer.msg("修改成功", {icon:1, time:1500});
+                                    obj.elem.checked = x;
+                                    form.render();
+                                } else {
+                                    layer.msg("修改失败", {icon:5, time:1500});
+                                }
+                            },
+                            error: function (data) {}
+                        });
+                        layer.close(index);
+                    }
+                    , btn2: function (index, layero) {
+                        obj.elem.checked = !x;
+                        form.render();
+                        layer.close(index);
+                    }
+                    , cancel: function () {
+                        obj.elem.checked = !x;
+                        form.render();
+                    }
+                });
+                return false;
+            });
+        });
+        getHospitalInfo()
+    });
+    function getHospitalInfo(){
+        layui.use('table', function(){
+            var table = layui.table;
+            var renderTable = function(){
+                table.render({
+                    elem: '#demo'
+                    ,height: 400
+                    ,url: "{url 'site/entry/GetHospitalInfo' array('m'=>$_GPC['m'],'op'=>'GetHospitalInfo','version_id'=>$_GPC['version_id'])}" //数据接口
+                    ,page: { //支持传入 laypage 组件的所有参数（某些参数除外，如：jump/elem） - 详见文档
+                        layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']//自定义分页布局
+                        ,limit: 8
+                        ,limits:[8]
+                        ,first: false //不显示首页
+                        ,last: false //不显示尾页
+                    }
+                    ,autoSort: false
+                    //,toolbar: true // 工具栏: 导出 打印等
+                    ,cols: [[ //表头
+                        {field: 'id', title: 'ID', width:'10%', sort: true,  align: 'center'},
+                        {field: 'sort', title: '排序', width:'10%', sort: true,  align: 'center'},
+                        {field: 'title', title: '医院名', width:'20%',  align: 'left'},
+                        {field: 'add_time', title: '创建时间', width:'15%', align: 'center'},
+                        {field: 'is_show', title: '显隐', width:'15%', align: 'center', templet: '#is_show'},
+                        {templet: '#oper-col', title: '操作', width: '30%', align: 'center'}
+                    ]],
+                    done: function () {}
+                });
+            };
+            renderTable();
+            table.on('sort(demo)', function(obj){
+                table.reload('demo', { //demo是表格容器id
+                    initSort: obj
+                    ,where: {
+                        field: obj.field //排序字段
+                        ,order: obj.type //排序方式
+                    }
+                });
+            });
+            // 绑定reload事件
+            var $ = layui.$, active = {
+                reload:function () {
+                    var condition = $('#searchInput').val();
+                    table.reload('demo',{
+                        method:'post',
+                        url:"{url 'site/entry/GetHospitalInfo' array('m'=>$_GPC['m'],'op'=>'GetHospitalInfo','version_id'=>$_GPC['version_id'])}",
+                        where:{
+                            search : condition
+                        },
+                        page:{
+                            curr:1
+                        }
+                    });
+                }
+            };
+            // 点击搜索
+            $('.searchBtn').on('click', function(){
+                var type = $(this).attr('data-type');
+                active[type] ? active[type].call(this): '';
+            });
+            // 刷新表格
+            $('#btn-refresh').click(function () {
+                renderTable();
+                $('#searchInput').val('');
+            });
+        });
+    }
+    function addHospital(){
+        var url = "https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=EditOrUpdateHospital&m=vote_active&op=EditOrUpdateHospital&version_id=0&type=1";
+        window.location.href = url;
+    }
+</script>
+{template 'common/footer'}

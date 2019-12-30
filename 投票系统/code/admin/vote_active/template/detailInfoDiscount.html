@@ -1,0 +1,332 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/line.css" />
+<style type="text/css">
+.choseTime{ width: 120px; height: 35px; line-height: 35px;}	
+.chooseTimeText{ height: 35px; line-height: 35px; padding-left: 30px;font-size: 16px;}
+</style>
+
+
+<input type="hidden" id="aid" value="{$aid}">
+<div class="layui-tab layui-tab-brief" lay-filter="tabBox">
+    <ul class="layui-tab-title">
+        <li class="layui-this" >
+            <a href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=activeResInfo&m=vote_active&op=activeResInfo&version_id=0&aid={$aid}">统计图</a>
+        </li>
+        <li>
+            <a href="https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=activeResInfo2&m=vote_active&op=activeResInfo2&version_id=0&aid={$aid}">数据列表</a>
+        </li>
+    </ul>
+    <div class="layui-tab-content"></div>
+</div>
+
+<div class="app_detail_overview">
+    <div class="mod_default_box">
+        <div class="mod_default_hd">
+            <form class="layui-form" >
+                <input type="hidden" id="chooseType_user" value="0">
+                <h4>
+                    <select name="chooseType" lay-filter="chooseType"  data_type="user">
+                        <option value="0">全部数据</option>
+                        <optgroup label="请选择参与者">
+                            {loop $list $index $item}
+                            {if $item['real_name']}
+                            <option value="{$item['id']}">{$item['real_name']}{php echo $item['is_del'] == 2 ? "(已删除)": ''}{php echo $item['is_show'] == 2 ? "(已隐藏)": ''}</option>
+                            {else}
+                            <option value="{$item['id']}">{$item['nick_name']}{php echo $item['is_del'] == 2 ? "(已删除)": ''}{php echo $item['is_show'] == 2 ? "(已隐藏)": ''}</option>
+                            {/if}
+                            {/loop}
+                        </optgroup>
+                    </select>
+                </h4>
+            </form>
+        </div>
+        <div style="display: flex; margin-bottom: 30px">
+            <input type="hidden" id="chooseTime_user">
+            <span>
+                <select name="chooseTime" class="choseTime" data_type="user">
+                    <option value="1">今天</option>
+                    <option value="2">最近7天</option>
+                    <option value="4">活动期间</option>
+                    <option value="3">自定义时间</option>
+                </select>
+            </span>
+            <div class="chooseTimeText"></div>
+        </div>
+        <div class="layui-form-item chooseTimeBox chooseTimeBox-user">
+            <label class="layui-inline">选择日期：</label>
+            <div class="layui-inline">
+                <input type="text" class="layui-input" id="dateChoose-user-begin">
+            </div>
+            至
+            <div class="layui-inline" style="margin-left: 10px">
+                <input type="text" class="layui-input" id="dateChoose-user-end">
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn btn-search"  data-type="reload" data-style="user">&nbsp;&nbsp;搜索&nbsp;&nbsp;</button>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-around">
+            <div id="user" class="map"></div>
+            <div id="userTip" class="map mapTip"></div>
+        </div>
+    </div>
+</div>
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        // 引入echarts
+        require.config({
+            baseUrl: "../",
+            paths: {
+                "eCharts": "js/echarts/eCharts"
+            }
+        });
+        layui.use('form', function(){
+            var form = layui.form;
+            // 监听select
+            form.on('select(chooseType)', function(data){
+                var type = data.value,
+                    chooseType = $(this).parent().parent().prev('select').attr('data_type'),
+                    begin = $('#dateChoose-'+chooseType+'-begin').val(),
+                    end = $('#dateChoose-'+chooseType+'-end').val(),
+                    a = $("#chooseType_"+chooseType).val();
+                if(chooseType == 'user'){
+                    //dateChoose-user-begin
+                    if (type == a){
+                        return false
+                    }
+                    getInfo(begin, end);
+                    $("#chooseType_"+chooseType).val(type);
+                }
+            });
+        });
+        var begin = getBeforeDate(0,1),
+            end = getBeforeDate(0,3);
+        $('.chooseTimeText').text(begin+" -- "+end);
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate,
+                element = layui.element;
+            laydate.render({
+                elem: '#dateChoose-user-begin',
+                value: begin,
+                type: 'datetime',
+                max: 0
+            });
+            laydate.render({
+                elem: '#dateChoose-user-end',
+                type: 'datetime',
+                value: end,
+                max: 0
+            });
+        });
+        getInfo(begin, end);
+    });
+    // 获取点赞分布图
+    function  getInfo(begin, end){
+        var type = '';
+        if(begin === true && end === true){
+            type = 1;
+        } else {
+            type = 2;
+        }
+        require(["eCharts"], function (echarts) {
+            var myChart = echarts.init(document.getElementById('user'));
+            myChart.showLoading();
+            $.ajax({
+                url: "{url 'site/entry/GetLineInfo' array('m'=>$_GPC['m'],'op'=>'GetLineInfo','version_id'=>$_GPC['version_id'])}",
+                data:{
+                    pid: $('#chooseType_user').val(),
+                    begin: begin,
+                    end: end,
+                    aid: $('#aid').val(),
+                    type: type
+                },
+                success: function (res) {
+                    res = JSON.parse(res);
+                    if(res.code == 200){
+                        var data  = res.data;
+                        $('#user').css('display', 'block');
+                        $('#userTip').css('display', 'none');
+                        myChart.setOption(option = {
+                            title: {
+                                text: '投票峰值图'
+                            },
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            xAxis: {
+                                data: data.map(function (item) {
+                                    return item[0];
+                                })
+                            },
+                            yAxis: {
+                                splitLine: {
+                                    show: false
+                                }
+                            },
+                            toolbox: {
+                                left: 'center',
+                                feature: {
+                                    dataZoom: {
+                                        yAxisIndex: 'none'
+                                    },
+                                    restore: {},
+                                    saveAsImage: {}
+                                }
+                            },
+                            dataZoom: [{
+                                startValue: res.begin
+                            }, {
+                                type: 'inside'
+                            }],
+                            visualMap: {
+                                top: 10,
+                                right: 10,
+                                pieces: [{
+                                    gt: 0,
+                                    lte: 10,
+                                    color: '#096'
+                                }, {
+                                    gt: 10,
+                                    lte: 50,
+                                    color: '#ffde33'
+                                }, {
+                                    gt: 50,
+                                    lte: 100,
+                                    color: '#ff9933'
+                                }, {
+                                    gt: 100,
+                                    lte: 300,
+                                    color: '#cc0033'
+                                }, {
+                                    gt: 300,
+                                    lte: 800,
+                                    color: '#660099'
+                                }, {
+                                    gt: 800,
+                                    color: '#7e0023'
+                                }],
+                                outOfRange: {
+                                    color: '#999'
+                                }
+                            },
+                            series: {
+                                name: '投票数',
+                                type: 'line',
+                                data: data.map(function (item) {
+                                    return item[1];
+                                }),
+                                markLine: {
+                                    silent: true,
+                                    data: [{
+                                        yAxis: 5
+                                    }, {
+                                        yAxis: 10
+                                    }, {
+                                        yAxis: 20
+                                    }, {
+                                        yAxis: 50
+                                    }, {
+                                        yAxis: 100
+                                    }]
+                                }
+                            }
+                        });
+                    } else {
+                        $('#user').css('display', 'none');
+                        $('#userTip').css('display', 'block').text("暂无数据");
+                    }
+                },
+                complete: function(){
+                    myChart.hideLoading();
+                }
+            });
+        });
+    }
+    // 触发下拉选择时间
+    $(".choseTime").change(function(){
+        //要触发的事件
+        var num = $(this).val(),
+            type = $(this).parent('select').context.attributes.data_type.value; // $(this).parent('select').attr('data_type') = undefined
+            //url = $("#chooseType_"+type).val();
+        //console.log(type, num);
+        if (num == 1){
+            var begin = getBeforeDate(0,1),
+                end = getBeforeDate(0,3);
+            $('.chooseTimeBox-'+type).hide(500);
+            $('.chooseTimeText').text(begin+" -- "+end);
+            $('#chooseTime_'+type).val(1)
+        } else if(num == 2){
+            var begin = getBeforeDate(-6,1),
+                end = getBeforeDate(0,3);
+            $('.chooseTimeBox-'+type).hide(500);
+            $('.chooseTimeText').text(begin+" -- "+end);
+            $('#chooseTime_'+type).val(2)
+        } else if(num == 3){
+            var begin = $('#dateChoose-'+type+'-begin').val(),
+                end = $('#dateChoose-'+type+'-end').val();
+            $('.chooseTimeText').text('');
+            $('.chooseTimeBox-'+type).show(500);
+            $('#chooseTime_'+type).val(3)
+        } else if(num == 4){
+            var begin = true, end = true;
+            $('.chooseTimeText').text("活动开始至结束时间");
+            $('#chooseTime_'+type).val(4)
+        }
+        layui.use(['laydate'], function () {
+            var laydate = layui.laydate;
+            laydate.render({
+                elem: '#dateChoose-'+type+'-begin',
+                value: begin,
+                type: 'datetime',
+                max: 0
+            });
+            laydate.render({
+                elem: '#dateChoose-'+type+'-end',
+                value: end,
+                type: 'datetime',
+                max: 0
+            });
+        });
+
+        if (type == "user"){
+            getInfo(begin, end)
+        }
+
+    });
+    // 自定义时间查询
+    $(".btn-search").on('click', function () {
+        var style = $(this).attr('data-style'),
+            begin = $('#dateChoose-'+style+'-begin').val(),
+            end = $('#dateChoose-'+style+'-end').val();
+        if(style == 'user'){
+            getInfo(begin, end)
+        }
+    });
+
+    // 获取时间 格式 yyyy-mm-dd
+    function getBeforeDate(n, type){
+        var date = new Date();
+        var year,month,day,h,i,s;
+        date.setDate(date.getDate()+n);
+        year = date.getFullYear();
+        month = date.getMonth()+1;
+        day = date.getDate();
+        h = date.getHours();
+        i = date.getMinutes();
+        s = date.getSeconds();
+        if (type == 1){
+            str = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) + ' 00:00:00';
+        } else if (type == 2){
+            str = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) + ' 23:59:59';
+        } else {
+            str = year + '-' + ( month < 10 ? ( '0' + month ) : month ) + '-' + ( day < 10 ? ( '0' + day ) : day) + ' ' + ( h < 10 ? ( '0' + h ) : h) + ':'+ ( i < 10 ? ( '0' + i ) : i) + ':'+ ( s < 10 ? ( '0' + s ) : s);
+        }
+
+        return str;
+    }
+</script>
+{template 'common/footer'}

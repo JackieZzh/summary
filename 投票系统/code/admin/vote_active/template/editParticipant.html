@@ -1,0 +1,204 @@
+{template 'common/header'}
+<link rel="stylesheet" href="{MODULE_URL}res/assets/layui/css/layui.css" />
+<link rel="stylesheet" href="{MODULE_URL}res/comment/css/file.css" />
+<style>
+    #synopsis{
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: slategray;
+        margin-right: 20px;
+    }
+</style>
+
+
+<div class="top" >
+    {if $type == 1 }
+    <span>添加参与者</span>
+    {else}
+    <span style="font-size: 20px;margin-bottom: 50px">参与者 {$data['name']} 的详情</span>
+    <p>添加者: {$data['add_operator']}</p>
+    <p>添加时间: {$data['add_time']}</p>
+    {/if}
+</div>
+
+<form class="layui-form" id="form" enctype="multipart/form-data">
+    <input type="hidden" name="type" id="type" value="{$type}">
+    <input type="hidden" name="aid" id="aid" value="{$aid}">
+    <input type="hidden" name="id" id="id" value="{$data['id']}">
+    <input type="hidden"  id="begin" value="{$data['begin']}">
+    <input type="hidden"  id="end" value="{$data['end']}">
+    <input type="hidden"  id="b_color" value="{$data['background_color']}">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">真实姓名</label>
+            <div class="layui-input-block">
+                <input type="text" name="real_name" lay-verify="title" autocomplete="off"  class="layui-input" value="{$data['real_name']}" maxlength="50">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">昵称</label>
+            <div class="layui-input-block">
+                <input type="text" name="nick_name"  autocomplete="off"  class="layui-input" value="{$data['nick_name']}" maxlength="50">
+                <span style="color:orangered">(不方便写真实姓名时 可填)</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">头像</label>
+        <div class="layui-input-block">
+            {php echo tpl_form_field_image('avatar_url',$data['avatar_url']);}
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">视频</label>
+        <div class="layui-input-block">
+            {php echo tpl_form_field_video('video_url', $data['video_url']);}
+        </div>
+    </div>
+
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">简介</label>
+        <div class="layui-input-block synopsis">
+            <textarea placeholder="请输入内容" lay-verify="required" name="introduction" class="layui-textarea" maxlength="255" id="synopsisText">{$data['introduction']}</textarea>
+            <span id="synopsis" ></span>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-inline ">
+            <label class="layui-form-label">年龄</label>
+            <div class="layui-input-block">
+                <input type="text" name="age" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['age']}">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-inline ">
+        <label class="layui-form-label">排序</label>
+        <div class="layui-input-block">
+            <input type="text" name="sort" lay-verify="number" autocomplete="off" class="layui-input" value="{$data['sort']}">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别</label>
+        <div class="layui-input-block">
+            {if $data['gender'] == 1 }
+            <input type="radio" name="gender" value="1" title="男" checked>
+            <input type="radio" name="gender" value="2" title="女">
+            {elseif $data['gender'] == 2}
+            <input type="radio" name="gender" value="1" title="男">
+            <input type="radio" name="gender" value="2" title="女" checked>
+            {else}
+            <input type="radio" name="gender" value="1" title="男">
+            <input type="radio" name="gender" value="2" title="女">
+            {/if}
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">显隐</label>
+        <div class="layui-input-block">
+            {if $data['is_show'] == 1}
+            <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏"  checked>
+            {else}
+            <input type="checkbox" name="is_show" lay-skin="switch" lay-text="显示|隐藏" >
+            {/if}
+        </div>
+    </div>
+
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <a class="layui-btn layui-btn-normal" id="submitBtn" lay-submit lay-filter="submitBtn"></a>
+        </div>
+    </div>
+
+</form>
+
+
+<script src="{MODULE_URL}res/assets/layui/layui.js"></script>
+
+<script type="text/javascript">
+    $(function(){
+        var type = $('#type').val();
+
+        if (type == 1){
+            $('#submitBtn').text('确认添加');
+        } else {
+            $('#submitBtn').text('确认修改');
+        }
+
+
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('submit(submitBtn)', function(){
+                // 添加 or 修改
+                var formData = new FormData($("#form")[0]); //此处id为form表单的id
+                $.ajax({
+                    url:"{url 'site/entry/addOrUpdateParticipant' array('m'=>$_GPC['m'],'op'=>'addOrUpdateParticipant','version_id'=>$_GPC['version_id'])}",
+                    type: 'post',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        res = $.parseJSON(res);
+                        if(res.code == 200){
+                            if($('#type').val() == 1){
+                                layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                    layer.open({
+                                        content: '是否继续添加?',
+                                        yes: function(){
+                                            window.location.href = "https://weixin.prykweb.com/web/index.php?c=site&a=entry&do=addParticipant&m=vote_active&op=addParticipant&version_id=0&type=1&aid="+$('#aid').val();
+                                        },
+                                        cancel: function(){
+                                            history.back(-1)
+                                        }
+                                    });
+                                });
+                            } else {
+                                layer.msg(res.errorMsg, {icon:1, time:1500}, function(){
+                                    history.back(-1)
+                                });
+                            }
+
+                        } else {
+                            layer.msg(res.errorMsg, {icon:5, time:1500});
+                        }
+                    },
+                    error: function (data) {}
+                });
+                return false;
+            })
+        });
+
+    });
+
+
+    $("#synopsisText").bind("input propertychange focus",function(){
+        var a = $(this).val(),
+            l = a.length,
+            c = 255 - l;
+        if (c > 0){
+            $('#synopsis').html("您还可以输入 <b>"+ c + "</b> 个字");
+        } else{
+            $('#synopsis').html("<b style='color:red;'>已达到最大字数!!!</b>");
+        }
+    });
+    $("#synopsisText").bind("blur", function(){
+        $('#synopsis').html("");
+    });
+
+</script>
+
+{template 'common/footer'}
